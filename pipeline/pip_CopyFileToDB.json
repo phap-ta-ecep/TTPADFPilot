@@ -117,9 +117,6 @@
 				"type": "string"
 			}
 		},
-		"folder": {
-			"name": "Pilot"
-		},
 		"annotations": []
 	}
 }

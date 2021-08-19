@@ -277,9 +277,6 @@
 				"type": "String"
 			}
 		},
-		"folder": {
-			"name": "Pilot"
-		},
 		"annotations": [
 			"CSVToDB"
 		],
