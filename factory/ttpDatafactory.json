@@ -1,0 +1,9 @@
+{
+	"name": "ttpDatafactory",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "a27a0f95-b641-42fc-9c0f-af1319757b61",
+		"tenantId": "82c14e67-f49f-4e3f-a56d-2f84e24ccbe7"
+	}
+}

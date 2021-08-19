@@ -1,0 +1,196 @@
+{
+	"name": "plp_InsertFileToControl2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select data_file_config_id, data_file_config_name from  [CONTROL].[DATA_FILE_CONFIGURATION] where data_file_config_id in (1,2)",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DSConfigID",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach2",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Set configID",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "configID",
+								"value": {
+									"value": "@string(item().data_file_config_id)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set configName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set configID",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "configName",
+								"value": {
+									"value": "@string(item().data_file_config_name)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Filter Impact Area Files",
+							"type": "Filter",
+							"dependsOn": [
+								{
+									"activity": "Set configName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"items": {
+									"value": "@activity('Get Metadata1_copy1').output.childitems",
+									"type": "Expression"
+								},
+								"condition": {
+									"value": "@startswith(item().name, variables('configName'))",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Metadata1_copy1",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Task",
+						"value": "get list file instore"
+					}
+				],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "PilotInputFiles",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
+								"value": "@pipeline().parameters.Container",
+								"type": "Expression"
+							},
+							"Directory": {
+								"value": "@pipeline().parameters.Directory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"itemName",
+						"itemType",
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Container": {
+				"type": "string",
+				"defaultValue": "pilot"
+			},
+			"Directory": {
+				"type": "string",
+				"defaultValue": "Broad/test"
+			},
+			"listConfigId": {
+				"type": "string",
+				"defaultValue": "1,2"
+			}
+		},
+		"variables": {
+			"configID": {
+				"type": "String"
+			},
+			"configName": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-18T16:48:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

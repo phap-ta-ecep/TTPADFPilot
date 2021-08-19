@@ -1,0 +1,7 @@
+{
+	"name": "ttpSeflHostIntegrationRuntime",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "create Integration Runtime use self hosted"
+	}
+}
