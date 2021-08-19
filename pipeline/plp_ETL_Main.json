@@ -3,30 +3,59 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup list import files",
-				"type": "Lookup",
+				"name": "ForEach1",
+				"type": "ForEach",
 				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
+					"items": {
+						"value": "@pipeline().parameters.listConfigId",
+						"type": "Expression"
 					},
-					"dataset": {
-						"referenceName": "DS_GetDataFromDB",
-						"type": "DatasetReference"
-					}
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "List files for ETL",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "select file_name from control.data_file where file_status in ('EF') and data_file_config_id =@{item()}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_GetDataFromDB",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": false
+							}
+						}
+					]
 				}
 			}
 		],
+		"parameters": {
+			"listConfigId": {
+				"type": "array",
+				"defaultValue": [
+					"1",
+					"2"
+				]
+			}
+		},
 		"folder": {
 			"name": "Pilot"
 		},
