@@ -37,7 +37,6 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"tableOption": "autoCreate",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -89,7 +88,17 @@
 				"outputs": [
 					{
 						"referenceName": "DS_Pilot_SQL_Broad",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "@pipeline().parameters.stagingTable",
+								"type": "Expression"
+							},
+							"schema": {
+								"value": "@pipeline().parameters.schema",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
@@ -108,7 +117,13 @@
 			},
 			"columnDelimiter": {
 				"type": "string",
-				"defaultValue": "'"
+				"defaultValue": "\t"
+			},
+			"schema": {
+				"type": "string"
+			},
+			"stagingTable": {
+				"type": "string"
 			}
 		},
 		"folder": {
