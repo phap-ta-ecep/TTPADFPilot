@@ -1,5 +1,5 @@
 {
-	"name": "DSConfigID",
+	"name": "DS_GetDataFromDB",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "connectSQL",
