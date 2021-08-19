@@ -1,5 +1,5 @@
 {
-	"name": "DS_Pilot_Broad",
+	"name": "DS_Pilot_Blod_Broad",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "PilotConnectODS",
@@ -45,6 +45,7 @@
 				"type": "Expression"
 			},
 			"escapeChar": "\\",
+			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
 		"schema": []

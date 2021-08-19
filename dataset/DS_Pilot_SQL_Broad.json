@@ -1,0 +1,33 @@
+{
+	"name": "DS_Pilot_SQL_Broad",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "connectSQL",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"tableName": {
+				"type": "string"
+			},
+			"schema": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().tableName",
+				"type": "Expression"
+			}
+		}
+	}
+}
