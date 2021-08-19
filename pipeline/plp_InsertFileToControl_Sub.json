@@ -110,6 +110,13 @@
 											"type": "Expression"
 										},
 										"type": "String"
+									},
+									"pipeline_run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
 									}
 								}
 							},
