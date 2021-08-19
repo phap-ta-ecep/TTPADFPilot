@@ -1,18 +1,11 @@
 {
-	"name": "plp_InsertFileToControl2",
+	"name": "plp_InsertFileToControl_Main",
 	"properties": {
 		"activities": [
 			{
 				"name": "Lookup1",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Get Metadata1_copy1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -24,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select data_file_config_id, data_file_config_name from  [CONTROL].[DATA_FILE_CONFIGURATION] where data_file_config_id in (1,2)",
+						"sqlReaderQuery": {
+							"value": "SELECT data_file_config_id, data_file_config_name,\ndata_file_target_schema,data_file_target_table,\ncontainer_dir,import_dir,success_dir,error_dir\nFROM  [CONTROL].[DATA_FILE_CONFIGURATION] where data_file_config_id in (1,2)",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -36,7 +32,7 @@
 				}
 			},
 			{
-				"name": "ForEach2",
+				"name": "ForEach Data File Configuration",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -55,192 +51,60 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Set configID",
-							"type": "SetVariable",
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "configID",
-								"value": {
-									"value": "@string(item().data_file_config_id)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Set configName",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "Set configID",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "configName",
-								"value": {
-									"value": "@string(item().data_file_config_name)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Filter Files",
-							"type": "Filter",
-							"dependsOn": [
-								{
-									"activity": "Set configName",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"items": {
-									"value": "@activity('Get Metadata1_copy1').output.childitems",
-									"type": "Expression"
+								"pipeline": {
+									"referenceName": "plp_InsertFileToControl_Sub",
+									"type": "PipelineReference"
 								},
-								"condition": {
-									"value": "@startswith(item().name, variables('configName'))",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "ForEach1",
-							"type": "ForEach",
-							"dependsOn": [
-								{
-									"activity": "Filter Files",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"items": {
-									"value": "@activity('Filter Files').output.Value",
-									"type": "Expression"
-								},
-								"isSequential": true,
-								"activities": [
-									{
-										"name": "Insert file to control data_file",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[InsertControlDataFile]",
-											"storedProcedureParameters": {
-												"ConfigId": {
-													"value": {
-														"value": "@int(variables('configID'))",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"Container": {
-													"value": {
-														"value": "@pipeline().parameters.Container",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"Directory": {
-													"value": {
-														"value": "@pipeline().parameters.Directory",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"FileName": {
-													"value": {
-														"value": "@item().name",
-														"type": "Expression"
-													},
-													"type": "String"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "connectSQL",
-											"type": "LinkedServiceReference"
-										}
+								"waitOnCompletion": true,
+								"parameters": {
+									"Container": {
+										"value": "@item().container_dir",
+										"type": "Expression"
+									},
+									"Directory": {
+										"value": "@item().import_dir",
+										"type": "Expression"
+									},
+									"configName": {
+										"value": "@item().data_file_config_name",
+										"type": "Expression"
+									},
+									"tableSchema": {
+										"value": "@item().data_file_target_schema",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@item().data_file_target_table",
+										"type": "Expression"
+									},
+									"success_dir": {
+										"value": "@item().success_dir",
+										"type": "Expression"
+									},
+									"error_dir": {
+										"value": "@item().error_dir",
+										"type": "Expression"
+									},
+									"configId": {
+										"value": "@item().data_file_config_id",
+										"type": "Expression"
 									}
-								]
+								}
 							}
 						}
 					]
 				}
-			},
-			{
-				"name": "Get Metadata1_copy1",
-				"type": "GetMetadata",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [
-					{
-						"name": "Task",
-						"value": "get list file instore"
-					}
-				],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "PilotInputFiles",
-						"type": "DatasetReference",
-						"parameters": {
-							"Container": {
-								"value": "@pipeline().parameters.Container",
-								"type": "Expression"
-							},
-							"Directory": {
-								"value": "@pipeline().parameters.Directory",
-								"type": "Expression"
-							}
-						}
-					},
-					"fieldList": [
-						"itemName",
-						"itemType",
-						"childItems"
-					],
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true,
-						"enablePartitionDiscovery": false
-					},
-					"formatSettings": {
-						"type": "DelimitedTextReadSettings"
-					}
-				}
 			}
 		],
 		"parameters": {
-			"Container": {
+			"listConfigId": {
 				"type": "string",
-				"defaultValue": "pilot"
-			},
-			"Directory": {
-				"type": "string",
-				"defaultValue": "Broad/test"
+				"defaultValue": "1,2"
 			}
 		},
 		"variables": {
