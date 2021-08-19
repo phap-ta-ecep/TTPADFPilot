@@ -77,74 +77,139 @@
 								"isSequential": true,
 								"activities": [
 									{
-										"name": "Copy data1",
-										"type": "Copy",
+										"name": "If Condition1",
+										"type": "IfCondition",
 										"dependsOn": [],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
 										"userProperties": [],
 										"typeProperties": {
-											"source": {
-												"type": "DelimitedTextSource",
-												"storeSettings": {
-													"type": "AzureBlobStorageReadSettings",
-													"recursive": true,
-													"enablePartitionDiscovery": false
+											"expression": {
+												"value": "@variables('isExtractFail')",
+												"type": "Expression"
+											},
+											"ifFalseActivities": [
+												{
+													"name": "Copy data1",
+													"type": "Copy",
+													"dependsOn": [],
+													"policy": {
+														"timeout": "7.00:00:00",
+														"retry": 0,
+														"retryIntervalInSeconds": 30,
+														"secureOutput": false,
+														"secureInput": false
+													},
+													"userProperties": [],
+													"typeProperties": {
+														"source": {
+															"type": "DelimitedTextSource",
+															"storeSettings": {
+																"type": "AzureBlobStorageReadSettings",
+																"recursive": true,
+																"enablePartitionDiscovery": false
+															},
+															"formatSettings": {
+																"type": "DelimitedTextReadSettings"
+															}
+														},
+														"sink": {
+															"type": "AzureSqlSink"
+														},
+														"enableStaging": false,
+														"translator": {
+															"type": "TabularTranslator",
+															"typeConversion": true,
+															"typeConversionSettings": {
+																"allowDataTruncation": true,
+																"treatBooleanAsNumber": false
+															}
+														}
+													},
+													"inputs": [
+														{
+															"referenceName": "DS_Pilot_Blod_Broad",
+															"type": "DatasetReference"
+														}
+													],
+													"outputs": [
+														{
+															"referenceName": "DS_Pilot_SQL_Broad",
+															"type": "DatasetReference"
+														}
+													]
 												},
-												"formatSettings": {
-													"type": "DelimitedTextReadSettings"
+												{
+													"name": "Update status to EF",
+													"type": "SqlServerStoredProcedure",
+													"dependsOn": [
+														{
+															"activity": "Set variable1",
+															"dependencyConditions": [
+																"Succeeded"
+															]
+														}
+													],
+													"policy": {
+														"timeout": "7.00:00:00",
+														"retry": 0,
+														"retryIntervalInSeconds": 30,
+														"secureOutput": false,
+														"secureInput": false
+													},
+													"userProperties": []
+												},
+												{
+													"name": "Move file to error folder",
+													"type": "Copy",
+													"dependsOn": [
+														{
+															"activity": "Update status to EF",
+															"dependencyConditions": [
+																"Succeeded"
+															]
+														}
+													],
+													"policy": {
+														"timeout": "7.00:00:00",
+														"retry": 0,
+														"retryIntervalInSeconds": 30,
+														"secureOutput": false,
+														"secureInput": false
+													},
+													"userProperties": [],
+													"typeProperties": {
+														"enableStaging": false
+													}
+												},
+												{
+													"name": "Set variable1",
+													"type": "SetVariable",
+													"dependsOn": [
+														{
+															"activity": "Copy data1",
+															"dependencyConditions": [
+																"Failed"
+															]
+														}
+													],
+													"userProperties": [],
+													"typeProperties": {
+														"variableName": "isExtractFail",
+														"value": true
+													}
 												}
-											},
-											"sink": {
-												"type": "AzureSqlSink"
-											},
-											"enableStaging": false,
-											"translator": {
-												"type": "TabularTranslator",
-												"typeConversion": true,
-												"typeConversionSettings": {
-													"allowDataTruncation": true,
-													"treatBooleanAsNumber": false
+											],
+											"ifTrueActivities": [
+												{
+													"name": "Wait1",
+													"type": "Wait",
+													"dependsOn": [],
+													"userProperties": [],
+													"typeProperties": {
+														"waitTimeInSeconds": 1
+													}
 												}
-											}
-										},
-										"inputs": [
-											{
-												"referenceName": "DS_Pilot_Blod_Broad",
-												"type": "DatasetReference"
-											}
-										],
-										"outputs": [
-											{
-												"referenceName": "DS_Pilot_SQL_Broad",
-												"type": "DatasetReference"
-											}
-										]
-									},
-									{
-										"name": "Update status to EF",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [
-											{
-												"activity": "Copy data1",
-												"dependencyConditions": [
-													"Failed"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": []
+											]
+										}
 									}
 								]
 							}
@@ -206,6 +271,29 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "Move file to Done folder",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Merge data from temp to ODS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"enableStaging": false
+							}
 						}
 					]
 				}
@@ -217,6 +305,10 @@
 			},
 			"tmpTableName": {
 				"type": "String"
+			},
+			"isExtractFail": {
+				"type": "Boolean",
+				"defaultValue": false
 			}
 		},
 		"folder": {
