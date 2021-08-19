@@ -117,7 +117,7 @@
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "Set variable1",
+												"activity": "Set isExtractFail  is True",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -156,7 +156,7 @@
 										}
 									},
 									{
-										"name": "Set variable1",
+										"name": "Set isExtractFail  is True",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
@@ -175,7 +175,7 @@
 								],
 								"ifTrueActivities": [
 									{
-										"name": "Wait1",
+										"name": "Exit by Extract Fail",
 										"type": "Wait",
 										"dependsOn": [],
 										"userProperties": [],
@@ -251,6 +251,17 @@
 						"value": "@and(variables('isExtractFail') , greater(activity('Check file_status ER').output.count, 0))",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "Exit By Have No File to ETL",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
 							"name": "Merge data from temp to ODS",
