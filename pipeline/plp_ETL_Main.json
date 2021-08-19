@@ -15,7 +15,8 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "List files for ETL",
+							"name": "Check file_status EF",
+							"description": "if count of 'EF' file > 0 => stop copy file to DB on configId",
 							"type": "Lookup",
 							"dependsOn": [],
 							"policy": {
@@ -41,6 +42,51 @@
 									"type": "DatasetReference"
 								},
 								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Check file_status EF",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(activity('Check file_status EF').output.count,0)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Start Copy File to DB",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "plp_ETL_Sub",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "There is an extract file that is corrupted",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								]
 							}
 						}
 					]
