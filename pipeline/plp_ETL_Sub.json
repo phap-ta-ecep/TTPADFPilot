@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select file_name from control.data_file where file_status in ('EF') and data_file_config_id =@{item()}",
+							"value": "select a.file_name ,b.data_file_target_schema,b.data_file_target_table,b.container_dir,b.import_dir\n,b.success_dir,b.error_dir\nfrom control.data_file a\nleft join control.data_file_configuration b on a.data_file_config_id = b.data_file_config_id \nwhere a.file_status in ('ER') and a.data_file_config_id =@{pipeline().parameters.configId}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -52,9 +52,28 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "If Condition1",
+							"name": "If Condition Check isExtractFail",
 							"type": "IfCondition",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Set Container",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set fileName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set Directory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
@@ -63,7 +82,7 @@
 								},
 								"ifFalseActivities": [
 									{
-										"name": "Copy data1",
+										"name": "Copy file to DB",
 										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
@@ -102,7 +121,25 @@
 										"inputs": [
 											{
 												"referenceName": "DS_Pilot_Blod_Broad",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@variables('container')",
+														"type": "Expression"
+													},
+													"directory": {
+														"value": "@variables('directory')",
+														"type": "Expression"
+													},
+													"fileName": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"columnDelimiter": {
+														"value": "@pipeline().parameters.tab",
+														"type": "Expression"
+													}
+												}
 											}
 										],
 										"outputs": [
@@ -160,7 +197,7 @@
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "Copy data1",
+												"activity": "Copy file to DB",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -185,57 +222,51 @@
 									}
 								]
 							}
+						},
+						{
+							"name": "Set Container",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "container",
+								"value": {
+									"value": "@item().container_dir",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Directory",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "directory",
+								"value": {
+									"value": "@item().import_dir",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set fileName",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "fileName",
+								"value": {
+									"value": "@item().file_name",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
 			},
 			{
-				"name": "Truncate temp table",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Check file_status ER",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": {
-							"value": "TRUNCATE TABLE @{concat(variables('tmpTableSchema') , '.' , variables('tmpTableName'))}",
-							"type": "Expression"
-						},
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "DS_Pilot_SQL_Broad",
-						"type": "DatasetReference",
-						"parameters": {
-							"tableName": {
-								"value": "@variables('tmpTableName')",
-								"type": "Expression"
-							},
-							"schema": {
-								"value": "@variables('tmpTableSchema')",
-								"type": "Expression"
-							}
-						}
-					}
-				}
-			},
-			{
-				"name": "If Condition2",
+				"name": "If Condition for Merge Data",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -321,18 +352,79 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Truncate temp table",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Check file_status ER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[TruncateTempTable]",
+					"storedProcedureParameters": {
+						"configId": {
+							"value": {
+								"value": "@pipeline().parameters.configId",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
+		"parameters": {
+			"configId": {
+				"type": "int"
+			},
+			"tab": {
+				"type": "string",
+				"defaultValue": "\t"
+			},
+			"commit": {
+				"type": "string",
+				"defaultValue": ","
+			}
+		},
 		"variables": {
-			"tmpTableSchema": {
+			"tableSchema": {
 				"type": "String"
 			},
-			"tmpTableName": {
+			"tableName": {
 				"type": "String"
 			},
 			"isExtractFail": {
 				"type": "Boolean",
 				"defaultValue": false
+			},
+			"container": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			},
+			"columnDelimiter": {
+				"type": "String"
+			},
+			"directory": {
+				"type": "String"
 			}
 		},
 		"folder": {
