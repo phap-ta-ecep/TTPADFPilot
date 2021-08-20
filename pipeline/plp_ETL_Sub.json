@@ -136,7 +136,7 @@
 														"type": "Expression"
 													},
 													"columnDelimiter": {
-														"value": "@pipeline().parameters.tab",
+														"value": "@pipeline().parameters.columnDelimiter",
 														"type": "Expression"
 													}
 												}
@@ -167,29 +167,47 @@
 											"secureOutput": false,
 											"secureInput": false
 										},
-										"userProperties": []
-									},
-									{
-										"name": "Move file to error folder",
-										"type": "Copy",
-										"dependsOn": [
-											{
-												"activity": "Update status to EF",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
 										"userProperties": [],
 										"typeProperties": {
-											"enableStaging": false
+											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureParameters": {
+												"fileName": {
+													"value": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"pipeline_run_id": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"source_count": {
+													"value": {
+														"value": "@activity('Copy file to DB').output.rowsRead",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"staging_load_count": {
+													"value": {
+														"value": "@activity('Copy file to DB').output.rowsCopied",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"status": {
+													"value": "'EF'",
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
 										}
 									},
 									{
@@ -207,6 +225,26 @@
 										"typeProperties": {
 											"variableName": "isExtractFail",
 											"value": true
+										}
+									},
+									{
+										"name": "Execute Pipeline1",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "Update status to EF",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "plp_Move_File",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true
 										}
 									}
 								],
@@ -394,13 +432,9 @@
 			"configId": {
 				"type": "int"
 			},
-			"tab": {
+			"columnDelimiter": {
 				"type": "string",
 				"defaultValue": "\t"
-			},
-			"commit": {
-				"type": "string",
-				"defaultValue": ","
 			}
 		},
 		"variables": {
@@ -420,11 +454,16 @@
 			"fileName": {
 				"type": "String"
 			},
-			"columnDelimiter": {
-				"type": "String"
-			},
 			"directory": {
 				"type": "String"
+			},
+			"doneDirectory": {
+				"type": "String",
+				"defaultValue": "Done"
+			},
+			"errorDirectory": {
+				"type": "String",
+				"defaultValue": "Error"
 			}
 		},
 		"folder": {
