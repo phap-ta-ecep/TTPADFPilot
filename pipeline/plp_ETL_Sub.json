@@ -1,0 +1,489 @@
+{
+	"name": "plp_ETL_Sub",
+	"properties": {
+		"activities": [
+			{
+				"name": "Check file_status ER",
+				"description": "if count of 'EF' file > 0 => stop copy file to DB on configId",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select a.file_name ,b.data_file_target_schema,b.data_file_target_table,b.container_dir,b.import_dir\n,b.success_dir,b.error_dir\nfrom control.data_file a\nleft join control.data_file_configuration b on a.data_file_config_id = b.data_file_config_id \nwhere a.file_status in ('ER') and a.data_file_config_id =@{pipeline().parameters.configId}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_GetDataFromDB",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Truncate temp table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Check file_status ER').output",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "If Condition Check isExtractFail",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Set Container",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set fileName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set Directory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@variables('isExtractFail')",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Copy file to DB",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "DelimitedTextSource",
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": true,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "DelimitedTextReadSettings"
+												}
+											},
+											"sink": {
+												"type": "AzureSqlSink"
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_Pilot_Blod_Broad",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@variables('container')",
+														"type": "Expression"
+													},
+													"directory": {
+														"value": "@variables('directory')",
+														"type": "Expression"
+													},
+													"fileName": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"columnDelimiter": {
+														"value": "@pipeline().parameters.columnDelimiter",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_Pilot_SQL_Broad",
+												"type": "DatasetReference"
+											}
+										]
+									},
+									{
+										"name": "Update status to EF",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Set isExtractFail  is True",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureParameters": {
+												"fileName": {
+													"value": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"pipeline_run_id": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"source_count": {
+													"value": {
+														"value": "@activity('Copy file to DB').output.rowsRead",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"staging_load_count": {
+													"value": {
+														"value": "@activity('Copy file to DB').output.rowsCopied",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"status": {
+													"value": "'EF'",
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Set isExtractFail  is True",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Copy file to DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											},
+											{
+												"activity": "Execute Pipeline Copy File to DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isExtractFail",
+											"value": true
+										}
+									},
+									{
+										"name": "Execute Pipeline Move File",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "Update status to EF",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "plp_Move_File",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true
+										}
+									},
+									{
+										"name": "Execute Pipeline Copy File to DB",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitOnCompletion": true
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "Exit by Extract Fail",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "Set Container",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "container",
+								"value": {
+									"value": "@item().container_dir",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Directory",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "directory",
+								"value": {
+									"value": "@item().import_dir",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set fileName",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "fileName",
+								"value": {
+									"value": "@item().file_name",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If Condition for Merge Data",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(variables('isExtractFail') , greater(activity('Check file_status ER').output.count, 0))",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Exit By Have No File to ETL",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Merge data from temp to ODS",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
+						},
+						{
+							"name": "Move file to Done folder",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Update status SU",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"enableStaging": false
+							}
+						},
+						{
+							"name": "Update status SU",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Merge data from temp to ODS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
+						}
+					]
+				}
+			},
+			{
+				"name": "Truncate temp table",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Check file_status ER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[TruncateTempTable]",
+					"storedProcedureParameters": {
+						"configId": {
+							"value": {
+								"value": "@pipeline().parameters.configId",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"configId": {
+				"type": "int"
+			},
+			"columnDelimiter": {
+				"type": "string",
+				"defaultValue": "\t"
+			}
+		},
+		"variables": {
+			"tableSchema": {
+				"type": "String"
+			},
+			"tableName": {
+				"type": "String"
+			},
+			"isExtractFail": {
+				"type": "Boolean",
+				"defaultValue": false
+			},
+			"container": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			},
+			"directory": {
+				"type": "String"
+			},
+			"doneDirectory": {
+				"type": "String",
+				"defaultValue": "Done"
+			},
+			"errorDirectory": {
+				"type": "String",
+				"defaultValue": "Error"
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": []
+	}
+}

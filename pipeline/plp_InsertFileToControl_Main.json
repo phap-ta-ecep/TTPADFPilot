@@ -1,0 +1,128 @@
+{
+	"name": "plp_InsertFileToControl_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT data_file_config_id, data_file_config_name,\ndata_file_target_schema,data_file_target_table,\ncontainer_dir,import_dir,success_dir,error_dir\nFROM  [CONTROL].[DATA_FILE_CONFIGURATION] where data_file_config_id in (1,2)",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_GetDataFromDB",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach Data File Configuration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "plp_InsertFileToControl_Sub",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Container": {
+										"value": "@item().container_dir",
+										"type": "Expression"
+									},
+									"Directory": {
+										"value": "@item().import_dir",
+										"type": "Expression"
+									},
+									"configName": {
+										"value": "@item().data_file_config_name",
+										"type": "Expression"
+									},
+									"tableSchema": {
+										"value": "@item().data_file_target_schema",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@item().data_file_target_table",
+										"type": "Expression"
+									},
+									"success_dir": {
+										"value": "@item().success_dir",
+										"type": "Expression"
+									},
+									"error_dir": {
+										"value": "@item().error_dir",
+										"type": "Expression"
+									},
+									"configId": {
+										"value": "@item().data_file_config_id",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"listConfigId": {
+				"type": "string",
+				"defaultValue": "1,2"
+			}
+		},
+		"variables": {
+			"configID": {
+				"type": "String"
+			},
+			"configName": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-18T16:48:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

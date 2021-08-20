@@ -1,5 +1,5 @@
 {
-	"name": "DSConfigID",
+	"name": "DS_GetDataFromDB",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "connectSQL",
@@ -53,11 +53,7 @@
 				"name": "data_file_process_wrapper_name",
 				"type": "varchar"
 			}
-		],
-		"typeProperties": {
-			"schema": "control",
-			"table": "data_file_configuration"
-		}
+		]
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
 }
