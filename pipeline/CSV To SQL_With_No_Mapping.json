@@ -1,0 +1,105 @@
+{
+	"name": "CSV To SQL_With_No_Mapping",
+	"properties": {
+		"description": "pipeline copy data from csv to sql db",
+		"activities": [
+			{
+				"name": "Copy file to DB",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Pilot_Blod_Broad",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.directory",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@pipeline().parameters.fileName",
+								"type": "Expression"
+							},
+							"columnDelimiter": {
+								"value": "@pipeline().parameters.columnDelimiter",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Pilot_SQL_Broad",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "tmp_ImpactArea",
+							"schema": "stg"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"container": {
+				"type": "string",
+				"defaultValue": "pilot"
+			},
+			"directory": {
+				"type": "string",
+				"defaultValue": "Broad/test"
+			},
+			"fileName": {
+				"type": "string",
+				"defaultValue": "ImpactArea_alenti@deloitte.it_2021-04-02-17-36-17.csv"
+			},
+			"columnDelimiter": {
+				"type": "string",
+				"defaultValue": "\t"
+			}
+		},
+		"annotations": [
+			"CSVToDB"
+		],
+		"lastPublishTime": "2021-08-18T14:40:48Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
