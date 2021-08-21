@@ -155,10 +155,7 @@
 														"value": "@variables('fileName')",
 														"type": "Expression"
 													},
-													"columnDelimiter": {
-														"value": "@variables('columnDelimiter')",
-														"type": "Expression"
-													}
+													"columnDelimiter": "\t"
 												}
 											}
 										],
