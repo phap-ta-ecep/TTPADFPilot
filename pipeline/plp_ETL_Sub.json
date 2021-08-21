@@ -626,10 +626,7 @@
 								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
 								"storedProcedureParameters": {
 									"fileName": {
-										"value": {
-											"value": "@variables('fileName')",
-											"type": "Expression"
-										},
+										"value": null,
 										"type": "String"
 									},
 									"pipeline_run_id": {
@@ -640,11 +637,11 @@
 										"type": "String"
 									},
 									"source_count": {
-										"value": "0",
+										"value": null,
 										"type": "Int32"
 									},
 									"staging_load_count": {
-										"value": "0",
+										"value": null,
 										"type": "Int32"
 									},
 									"status": {
