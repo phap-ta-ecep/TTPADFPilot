@@ -511,99 +511,6 @@
 							}
 						},
 						{
-							"name": "Move file to Done folder",
-							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Update status SU",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "DelimitedTextSource",
-									"storeSettings": {
-										"type": "AzureBlobStorageReadSettings",
-										"recursive": true,
-										"enablePartitionDiscovery": false
-									},
-									"formatSettings": {
-										"type": "DelimitedTextReadSettings"
-									}
-								},
-								"sink": {
-									"type": "DelimitedTextSink",
-									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings"
-									},
-									"formatSettings": {
-										"type": "DelimitedTextWriteSettings",
-										"quoteAllText": true,
-										"fileExtension": ".txt"
-									}
-								},
-								"enableStaging": false
-							},
-							"inputs": [
-								{
-									"referenceName": "DS_Pilot_Blod_Broad",
-									"type": "DatasetReference",
-									"parameters": {
-										"container": {
-											"value": "@variables('container')",
-											"type": "Expression"
-										},
-										"directory": {
-											"value": "@variables('directory')",
-											"type": "Expression"
-										},
-										"fileName": {
-											"value": "@variables('fileName')",
-											"type": "Expression"
-										},
-										"columnDelimiter": {
-											"value": "@variables('columnDelimiter')",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "DS_Pilot_Blod_Broad",
-									"type": "DatasetReference",
-									"parameters": {
-										"container": {
-											"value": "@variables('container')",
-											"type": "Expression"
-										},
-										"directory": {
-											"value": "@variables('doneDirectory')",
-											"type": "Expression"
-										},
-										"fileName": {
-											"value": "@variables('fileName')",
-											"type": "Expression"
-										},
-										"columnDelimiter": {
-											"value": "@variables('columnDelimiter')",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						},
-						{
 							"name": "Update status SU",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
@@ -653,6 +560,26 @@
 							"linkedServiceName": {
 								"referenceName": "connectSQL",
 								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Move Files To Done Folder",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Update status SU",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "plp_Move_File",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
 							}
 						}
 					]
