@@ -434,7 +434,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "tableName",
-								"value": "data_file_target_table"
+								"value": {
+									"value": "@item().data_file_target_table",
+									"type": "Expression"
+								}
 							}
 						},
 						{
