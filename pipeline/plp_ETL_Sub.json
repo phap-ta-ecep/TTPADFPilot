@@ -125,10 +125,6 @@
 											},
 											"sink": {
 												"type": "AzureSqlSink",
-												"tableOption": {
-													"value": "@{concat('[', variables('tableSchema'), '].[' , variables('tableName'),']')}",
-													"type": "Expression"
-												},
 												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
