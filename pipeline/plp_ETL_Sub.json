@@ -227,7 +227,7 @@
 													"type": "Int32"
 												},
 												"status": {
-													"value": "'EF'",
+													"value": "EF",
 													"type": "String"
 												}
 											}
@@ -348,7 +348,7 @@
 													"type": "Int32"
 												},
 												"status": {
-													"value": "'TR'",
+													"value": "TR",
 													"type": "String"
 												}
 											}
