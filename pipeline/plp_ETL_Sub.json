@@ -217,14 +217,14 @@
 												},
 												"source_count": {
 													"value": {
-														"value": "@activity('Copy file to DB').output.rowsRead",
+														"value": "0",
 														"type": "Expression"
 													},
 													"type": "Int32"
 												},
 												"staging_load_count": {
 													"value": {
-														"value": "@activity('Copy file to DB').output.rowsCopied",
+														"value": "0",
 														"type": "Expression"
 													},
 													"type": "Int32"
