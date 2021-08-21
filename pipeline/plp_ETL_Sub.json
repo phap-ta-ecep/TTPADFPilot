@@ -466,7 +466,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(variables('isExtractFail') , greater(activity('Check file_status ER').output.count, 0))",
+						"value": "@and( not(variables('isExtractFail')) , greater(activity('Check file_status ER').output.count, 0))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
