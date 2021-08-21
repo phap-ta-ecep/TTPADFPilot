@@ -123,8 +123,7 @@
 			"listConfigId": {
 				"type": "array",
 				"defaultValue": [
-					"1",
-					"2"
+					"1"
 				]
 			}
 		},

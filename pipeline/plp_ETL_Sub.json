@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select a.file_name ,b.data_file_target_schema,b.data_file_target_table,b.container_dir,b.import_dir\n,b.success_dir,b.error_dir\nfrom control.data_file a\nleft join control.data_file_configuration b on a.data_file_config_id = b.data_file_config_id \nwhere a.file_status in ('ER') and a.data_file_config_id =@{pipeline().parameters.configId}",
+							"value": "select a.file_name ,b.data_file_target_schema,b.data_file_target_table,b.container_dir,b.import_dir\n,b.success_dir,b.error_dir, b.delimiter\nfrom control.data_file a\nleft join control.data_file_configuration b on a.data_file_config_id = b.data_file_config_id \nwhere a.file_status in ('ER') and a.data_file_config_id =@{pipeline().parameters.configId}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -72,6 +72,18 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "Set sinkSchema",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set sinkTableName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
 							],
 							"userProperties": [],
@@ -106,7 +118,9 @@
 												}
 											},
 											"sink": {
-												"type": "AzureSqlSink"
+												"type": "AzureSqlSink",
+												"tableOption": "autoCreate",
+												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
 											"translator": {
@@ -136,7 +150,7 @@
 														"type": "Expression"
 													},
 													"columnDelimiter": {
-														"value": "@pipeline().parameters.columnDelimiter",
+														"value": "@variables('columnDelimiter')",
 														"type": "Expression"
 													}
 												}
@@ -145,7 +159,17 @@
 										"outputs": [
 											{
 												"referenceName": "DS_Pilot_SQL_Broad",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"tableName": {
+														"value": "@variables('tableName')",
+														"type": "Expression"
+													},
+													"schema": {
+														"value": "@variables('tableSchema')",
+														"type": "Expression"
+													}
+												}
 											}
 										]
 									},
@@ -219,12 +243,6 @@
 												"dependencyConditions": [
 													"Failed"
 												]
-											},
-											{
-												"activity": "Execute Pipeline Copy File to DB",
-												"dependencyConditions": [
-													"Failed"
-												]
 											}
 										],
 										"userProperties": [],
@@ -250,16 +268,29 @@
 												"referenceName": "plp_Move_File",
 												"type": "PipelineReference"
 											},
-											"waitOnCompletion": true
-										}
-									},
-									{
-										"name": "Execute Pipeline Copy File to DB",
-										"type": "ExecutePipeline",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"waitOnCompletion": true
+											"waitOnCompletion": true,
+											"parameters": {
+												"container": {
+													"value": "@variables('container')",
+													"type": "Expression"
+												},
+												"sourceDirectory": {
+													"value": "@variables('directory')",
+													"type": "Expression"
+												},
+												"desDirectory": {
+													"value": "@variables('directory')",
+													"type": "Expression"
+												},
+												"fileName": {
+													"value": "@variables('fileName')",
+													"type": "Expression"
+												},
+												"columDelimiter": {
+													"value": "@variables('columnDelimiter')",
+													"type": "Expression"
+												}
+											}
 										}
 									}
 								],
@@ -313,6 +344,29 @@
 									"value": "@item().file_name",
 									"type": "Expression"
 								}
+							}
+						},
+						{
+							"name": "Set sinkSchema",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableSchema",
+								"value": {
+									"value": "@item().data_file_target_schema",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set sinkTableName",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableName",
+								"value": "data_file_target_table"
 							}
 						}
 					]
@@ -408,6 +462,7 @@
 			},
 			{
 				"name": "Truncate temp table",
+				"description": "If temp table is exists => truncate table",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
@@ -446,10 +501,6 @@
 		"parameters": {
 			"configId": {
 				"type": "int"
-			},
-			"columnDelimiter": {
-				"type": "string",
-				"defaultValue": "\t"
 			}
 		},
 		"variables": {
@@ -479,6 +530,9 @@
 			"errorDirectory": {
 				"type": "String",
 				"defaultValue": "Error"
+			},
+			"columnDelimiter": {
+				"type": "String"
 			}
 		},
 		"folder": {

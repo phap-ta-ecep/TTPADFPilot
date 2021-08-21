@@ -148,24 +148,19 @@
 		],
 		"parameters": {
 			"container": {
-				"type": "string",
-				"defaultValue": "pilot"
+				"type": "string"
 			},
 			"sourceDirectory": {
-				"type": "string",
-				"defaultValue": "Broad/test"
+				"type": "string"
 			},
 			"desDirectory": {
-				"type": "string",
-				"defaultValue": "Error"
+				"type": "string"
 			},
 			"fileName": {
-				"type": "string",
-				"defaultValue": "del.csv"
+				"type": "string"
 			},
 			"columDelimiter": {
-				"type": "string",
-				"defaultValue": "\t"
+				"type": "string"
 			}
 		},
 		"folder": {
