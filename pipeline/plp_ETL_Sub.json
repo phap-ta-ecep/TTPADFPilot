@@ -412,7 +412,23 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[Pilot_MergeData]",
+								"storedProcedureParameters": {
+									"configId": {
+										"value": {
+											"value": "@pipeline().parameters.configId",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
+							}
 						},
 						{
 							"name": "Move file to Done folder",
@@ -434,8 +450,78 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Pilot_Blod_Broad",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@variables('container')",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('directory')",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@variables('fileName')",
+											"type": "Expression"
+										},
+										"columnDelimiter": {
+											"value": "@variables('columnDelimiter')",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Pilot_Blod_Broad",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@variables('container')",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('doneDirectory')",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@variables('fileName')",
+											"type": "Expression"
+										},
+										"columnDelimiter": {
+											"value": "@variables('columnDelimiter')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						},
 						{
 							"name": "Update status SU",
@@ -455,7 +541,42 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureParameters": {
+									"fileName": {
+										"value": {
+											"value": "@variables('fileName')",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"pipeline_run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"source_count": {
+										"value": "0",
+										"type": "Int32"
+									},
+									"staging_load_count": {
+										"value": "0",
+										"type": "Int32"
+									},
+									"status": {
+										"value": "'SU'",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
