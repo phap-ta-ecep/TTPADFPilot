@@ -18,7 +18,14 @@
 							"name": "Check file_status EF",
 							"description": "if count of 'EF' file > 0 => stop copy file to DB on configId",
 							"type": "Lookup",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Set variable1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -72,7 +79,13 @@
 												"referenceName": "plp_ETL_Sub",
 												"type": "PipelineReference"
 											},
-											"waitOnCompletion": true
+											"waitOnCompletion": true,
+											"parameters": {
+												"configId": {
+													"value": "@variables('configId')",
+													"type": "Expression"
+												}
+											}
 										}
 									}
 								],
@@ -88,6 +101,19 @@
 									}
 								]
 							}
+						},
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "configId",
+								"value": {
+									"value": "@item()",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -100,6 +126,11 @@
 					"1",
 					"2"
 				]
+			}
+		},
+		"variables": {
+			"configId": {
+				"type": "String"
 			}
 		},
 		"folder": {
