@@ -46,7 +46,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Check file_status ER').output",
+						"value": "@activity('Check file_status ER').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
