@@ -33,7 +33,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEach to Extract From File To DB",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -254,7 +254,7 @@
 										}
 									},
 									{
-										"name": "Execute Pipeline Move File",
+										"name": "Move File to Error Folder",
 										"type": "ExecutePipeline",
 										"dependsOn": [
 											{
@@ -477,7 +477,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "ForEach1",
+						"activity": "ForEach to Extract From File To DB",
 						"dependencyConditions": [
 							"Succeeded"
 						]
