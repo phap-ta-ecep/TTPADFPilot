@@ -685,8 +685,7 @@
 				"type": "String"
 			},
 			"fileName": {
-				"type": "String",
-				"defaultValue": "[]"
+				"type": "String"
 			},
 			"directory": {
 				"type": "String"
