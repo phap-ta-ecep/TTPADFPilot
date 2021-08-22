@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select a.file_name ,b.data_file_target_schema,b.data_file_target_table,b.container_dir,b.import_dir\n,b.success_dir,b.error_dir\nfrom control.data_file a\nleft join control.data_file_configuration b on a.data_file_config_id = b.data_file_config_id \nwhere a.file_status in ('ER') and a.data_file_config_id =@{pipeline().parameters.configId}",
+							"value": "select a.file_name ,b.data_file_target_schema,b.data_file_target_table,b.container_dir,b.import_dir\n,b.success_dir,b.error_dir, b.delimiter\nfrom control.data_file a\nleft join control.data_file_configuration b on a.data_file_config_id = b.data_file_config_id \nwhere a.file_status in ('ER') and a.data_file_config_id =@{pipeline().parameters.configId}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -33,7 +33,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEach to Extract From File To DB",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -46,7 +46,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Check file_status ER').output",
+						"value": "@activity('Check file_status ER').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
@@ -69,6 +69,24 @@
 								},
 								{
 									"activity": "Set Directory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set sinkSchema",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set sinkTableName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set desDirectory",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -106,7 +124,8 @@
 												}
 											},
 											"sink": {
-												"type": "AzureSqlSink"
+												"type": "AzureSqlSink",
+												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
 											"translator": {
@@ -135,17 +154,24 @@
 														"value": "@variables('fileName')",
 														"type": "Expression"
 													},
-													"columnDelimiter": {
-														"value": "@pipeline().parameters.columnDelimiter",
-														"type": "Expression"
-													}
+													"columnDelimiter": "\t"
 												}
 											}
 										],
 										"outputs": [
 											{
 												"referenceName": "DS_Pilot_SQL_Broad",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"tableName": {
+														"value": "@variables('tableName')",
+														"type": "Expression"
+													},
+													"schema": {
+														"value": "@variables('tableSchema')",
+														"type": "Expression"
+													}
+												}
 											}
 										]
 									},
@@ -155,6 +181,127 @@
 										"dependsOn": [
 											{
 												"activity": "Set isExtractFail  is True",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureParameters": {
+												"fileName": {
+													"value": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"pipeline_run_id": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"source_count": {
+													"value": {
+														"value": "0",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"staging_load_count": {
+													"value": {
+														"value": "0",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"status": {
+													"value": "EF",
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Set isExtractFail  is True",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Copy file to DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isExtractFail",
+											"value": true
+										}
+									},
+									{
+										"name": "Move File to Error Folder",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "Update status to EF",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "plp_Move_File",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"container": {
+													"value": "@variables('container')",
+													"type": "Expression"
+												},
+												"sourceDirectory": {
+													"value": "@variables('directory')",
+													"type": "Expression"
+												},
+												"desDirectory": {
+													"value": "@variables('errorDirectory')",
+													"type": "Expression"
+												},
+												"listFileName": {
+													"value": "@array(variables('fileName'))",
+													"type": "Expression"
+												},
+												"columDelimiter": {
+													"value": "@variables('columnDelimiter')",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									{
+										"name": "Update status to TR",
+										"description": "TR : transfrom ready",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Copy file to DB",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -200,7 +347,7 @@
 													"type": "Int32"
 												},
 												"status": {
-													"value": "'EF'",
+													"value": "TR",
 													"type": "String"
 												}
 											}
@@ -211,34 +358,11 @@
 										}
 									},
 									{
-										"name": "Set isExtractFail  is True",
-										"type": "SetVariable",
+										"name": "Append fileName to listFileName",
+										"type": "AppendVariable",
 										"dependsOn": [
 											{
-												"activity": "Copy file to DB",
-												"dependencyConditions": [
-													"Failed"
-												]
-											},
-											{
-												"activity": "Execute Pipeline Copy File to DB",
-												"dependencyConditions": [
-													"Failed"
-												]
-											}
-										],
-										"userProperties": [],
-										"typeProperties": {
-											"variableName": "isExtractFail",
-											"value": true
-										}
-									},
-									{
-										"name": "Execute Pipeline Move File",
-										"type": "ExecutePipeline",
-										"dependsOn": [
-											{
-												"activity": "Update status to EF",
+												"activity": "Update data_file_guid to temp table",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -246,20 +370,54 @@
 										],
 										"userProperties": [],
 										"typeProperties": {
-											"pipeline": {
-												"referenceName": "plp_Move_File",
-												"type": "PipelineReference"
-											},
-											"waitOnCompletion": true
+											"variableName": "listFileName",
+											"value": {
+												"value": "@variables('fileName')",
+												"type": "Expression"
+											}
 										}
 									},
 									{
-										"name": "Execute Pipeline Copy File to DB",
-										"type": "ExecutePipeline",
-										"dependsOn": [],
+										"name": "Update data_file_guid to temp table",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Update status to TR",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
-											"waitOnCompletion": true
+											"storedProcedureName": "[dbo].[UpdateDataFileGuid]",
+											"storedProcedureParameters": {
+												"fileName": {
+													"value": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"tableName": {
+													"value": {
+														"value": "@concat(variables('tableSchema'), '.' , variables('tableName'))",
+														"type": "Expression"
+													},
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
 										}
 									}
 								],
@@ -314,6 +472,45 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "Set sinkSchema",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableSchema",
+								"value": {
+									"value": "@item().data_file_target_schema",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set sinkTableName",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableName",
+								"value": {
+									"value": "@item().data_file_target_table",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set desDirectory",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "errorDirectory",
+								"value": {
+									"value": "@item().error_dir",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -323,7 +520,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "ForEach1",
+						"activity": "ForEach to Extract From File To DB",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -332,7 +529,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(variables('isExtractFail') , greater(activity('Check file_status ER').output.count, 0))",
+						"value": "@and( not(variables('isExtractFail')) , greater(activity('Check file_status ER').output.count, 0))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -358,29 +555,22 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
-						},
-						{
-							"name": "Move file to Done folder",
-							"type": "Copy",
-							"dependsOn": [
-								{
-									"activity": "Update status SU",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
 							"userProperties": [],
 							"typeProperties": {
-								"enableStaging": false
+								"storedProcedureName": "[dbo].[Pilot_MergeData]",
+								"storedProcedureParameters": {
+									"configId": {
+										"value": {
+											"value": "@pipeline().parameters.configId",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
 							}
 						},
 						{
@@ -401,13 +591,88 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureParameters": {
+									"fileName": {
+										"value": null,
+										"type": "String"
+									},
+									"pipeline_run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"source_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"staging_load_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"status": {
+										"value": "SU",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Move Files To Done Folder",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Update status SU",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "plp_Move_File",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"container": {
+										"value": "@variables('container')",
+										"type": "Expression"
+									},
+									"sourceDirectory": {
+										"value": "@variables('directory')",
+										"type": "Expression"
+									},
+									"desDirectory": {
+										"value": "@variables('doneDirectory')",
+										"type": "Expression"
+									},
+									"listFileName": {
+										"value": "@variables('listFileName')",
+										"type": "Expression"
+									},
+									"columDelimiter": {
+										"value": "@variables('columnDelimiter')",
+										"type": "Expression"
+									}
+								}
+							}
 						}
 					]
 				}
 			},
 			{
 				"name": "Truncate temp table",
+				"description": "If temp table is exists => truncate table",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
@@ -446,10 +711,6 @@
 		"parameters": {
 			"configId": {
 				"type": "int"
-			},
-			"columnDelimiter": {
-				"type": "string",
-				"defaultValue": "\t"
 			}
 		},
 		"variables": {
@@ -479,6 +740,12 @@
 			"errorDirectory": {
 				"type": "String",
 				"defaultValue": "Error"
+			},
+			"columnDelimiter": {
+				"type": "String"
+			},
+			"listFileName": {
+				"type": "Array"
 			}
 		},
 		"folder": {

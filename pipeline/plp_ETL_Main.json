@@ -15,10 +15,17 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Check file_status EF",
+							"name": "Get EF Files",
 							"description": "if count of 'EF' file > 0 => stop copy file to DB on configId",
 							"type": "Lookup",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Set variable1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -45,11 +52,11 @@
 							}
 						},
 						{
-							"name": "If Condition1",
+							"name": "Check Exists EF File",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "Check file_status EF",
+									"activity": "Get EF Files",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -58,7 +65,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(activity('Check file_status EF').output.count,0)",
+									"value": "@greater(activity('Get EF Files').output.count,0)",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
@@ -72,13 +79,19 @@
 												"referenceName": "plp_ETL_Sub",
 												"type": "PipelineReference"
 											},
-											"waitOnCompletion": true
+											"waitOnCompletion": true,
+											"parameters": {
+												"configId": {
+													"value": "@variables('configId')",
+													"type": "Expression"
+												}
+											}
 										}
 									}
 								],
 								"ifTrueActivities": [
 									{
-										"name": "There is an extract file that is corrupted",
+										"name": "Exit By Exists EF File",
 										"type": "Wait",
 										"dependsOn": [],
 										"userProperties": [],
@@ -88,8 +101,64 @@
 									}
 								]
 							}
+						},
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "configId",
+								"value": {
+									"value": "@item()",
+									"type": "Expression"
+								}
+							}
 						}
 					]
+				}
+			},
+			{
+				"name": "ADF Pipeline Excutions Log",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_Control_Pipeline_Fail",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineName": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"DataFactoryName": {
+							"value": "@pipeline().DataFactory",
+							"type": "Expression"
+						},
+						"ErrorMessage": "N/A",
+						"RunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().TriggerName",
+							"type": "Expression"
+						},
+						"TriggerTime": {
+							"value": "@pipeline().TriggerTime",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
@@ -97,9 +166,16 @@
 			"listConfigId": {
 				"type": "array",
 				"defaultValue": [
-					"1",
-					"2"
+					"1"
 				]
+			}
+		},
+		"variables": {
+			"configId": {
+				"type": "String"
+			},
+			"errorMessages": {
+				"type": "Array"
 			}
 		},
 		"folder": {

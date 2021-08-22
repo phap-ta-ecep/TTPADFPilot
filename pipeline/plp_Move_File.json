@@ -3,169 +3,179 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy file to desDirectory",
-				"type": "Copy",
+				"name": "ForEach To Move File",
+				"type": "ForEach",
 				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+					"items": {
+						"value": "@pipeline().parameters.listFileName",
+						"type": "Expression"
 					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy file to desDirectory",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Pilot_Blod_Broad",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@pipeline().parameters.sourceDirectory",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"columnDelimiter": {
+											"value": "@pipeline().parameters.columDelimiter",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Pilot_Blod_Broad",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@pipeline().parameters.desDirectory",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"columnDelimiter": {
+											"value": "@pipeline().parameters.columDelimiter",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "DS_Pilot_Blod_Broad",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": {
-								"value": "@pipeline().parameters.container",
-								"type": "Expression"
+						{
+							"name": "Delete sourceFile",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Copy file to desDirectory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
 							},
-							"directory": {
-								"value": "@pipeline().parameters.sourceDirectory",
-								"type": "Expression"
-							},
-							"fileName": {
-								"value": "@pipeline().parameters.fileName",
-								"type": "Expression"
-							},
-							"columnDelimiter": {
-								"value": "@pipeline().parameters.columDelimiter",
-								"type": "Expression"
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Pilot_Blod_Broad",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@pipeline().parameters.sourceDirectory",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"columnDelimiter": {
+											"value": "@pipeline().parameters.columDelimiter",
+											"type": "Expression"
+										}
+									}
+								},
+								"logStorageSettings": {
+									"linkedServiceName": {
+										"referenceName": "PilotConnectODS",
+										"type": "LinkedServiceReference"
+									},
+									"path": "pilot/Logs"
+								},
+								"enableLogging": true,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
 							}
 						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DS_Pilot_Blod_Broad",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": {
-								"value": "@pipeline().parameters.container",
-								"type": "Expression"
-							},
-							"directory": {
-								"value": "@pipeline().parameters.desDirectory",
-								"type": "Expression"
-							},
-							"fileName": {
-								"value": "@pipeline().parameters.fileName",
-								"type": "Expression"
-							},
-							"columnDelimiter": {
-								"value": "@pipeline().parameters.columDelimiter",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Delete sourceFile",
-				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "Copy file to desDirectory",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "DS_Pilot_Blod_Broad",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": {
-								"value": "@pipeline().parameters.container",
-								"type": "Expression"
-							},
-							"directory": {
-								"value": "@pipeline().parameters.sourceDirectory",
-								"type": "Expression"
-							},
-							"fileName": {
-								"value": "@pipeline().parameters.fileName",
-								"type": "Expression"
-							},
-							"columnDelimiter": {
-								"value": "@pipeline().parameters.columDelimiter",
-								"type": "Expression"
-							}
-						}
-					},
-					"logStorageSettings": {
-						"linkedServiceName": {
-							"referenceName": "PilotConnectODS",
-							"type": "LinkedServiceReference"
-						},
-						"path": "pilot/Logs"
-					},
-					"enableLogging": true,
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true,
-						"enablePartitionDiscovery": false
-					}
+					]
 				}
 			}
 		],
 		"parameters": {
 			"container": {
-				"type": "string",
-				"defaultValue": "pilot"
+				"type": "string"
 			},
 			"sourceDirectory": {
-				"type": "string",
-				"defaultValue": "Broad/test"
+				"type": "string"
 			},
 			"desDirectory": {
-				"type": "string",
-				"defaultValue": "Error"
+				"type": "string"
 			},
-			"fileName": {
-				"type": "string",
-				"defaultValue": "del.csv"
+			"listFileName": {
+				"type": "array"
 			},
 			"columDelimiter": {
-				"type": "string",
-				"defaultValue": "\t"
+				"type": "string"
 			}
 		},
 		"folder": {
