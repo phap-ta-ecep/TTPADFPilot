@@ -145,7 +145,7 @@
 							"value": "@pipeline().DataFactory",
 							"type": "Expression"
 						},
-						"ErrorMessage": "''",
+						"ErrorMessage": "N/A",
 						"RunID": {
 							"value": "@pipeline().RunId",
 							"type": "Expression"
