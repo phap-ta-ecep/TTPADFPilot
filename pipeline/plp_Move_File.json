@@ -156,8 +156,8 @@
 			"desDirectory": {
 				"type": "string"
 			},
-			"fileName": {
-				"type": "string"
+			"listFileName": {
+				"type": "array"
 			},
 			"columDelimiter": {
 				"type": "string"

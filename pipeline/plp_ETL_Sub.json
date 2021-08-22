@@ -284,8 +284,8 @@
 													"value": "@variables('errorDirectory')",
 													"type": "Expression"
 												},
-												"fileName": {
-													"value": "@variables('fileName')",
+												"listFileName": {
+													"value": "@array(variables('fileName'))",
 													"type": "Expression"
 												},
 												"columDelimiter": {
@@ -355,6 +355,26 @@
 										"linkedServiceName": {
 											"referenceName": "connectSQL",
 											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Append fileName to listFileName",
+										"type": "AppendVariable",
+										"dependsOn": [
+											{
+												"activity": "Update status to TR",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "listFileName",
+											"value": {
+												"value": "@variables('fileName')",
+												"type": "Expression"
+											}
 										}
 									}
 								],
@@ -579,7 +599,29 @@
 									"referenceName": "plp_Move_File",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"container": {
+										"value": "@variables('container')",
+										"type": "Expression"
+									},
+									"sourceDirectory": {
+										"value": "@variables('directory')",
+										"type": "Expression"
+									},
+									"desDirectory": {
+										"value": "@variables('doneDirectory')",
+										"type": "Expression"
+									},
+									"listFileName": {
+										"value": "@variables('listFileName')",
+										"type": "Expression"
+									},
+									"columDelimiter": {
+										"value": "@variables('columnDelimiter')",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
@@ -643,7 +685,8 @@
 				"type": "String"
 			},
 			"fileName": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "[]"
 			},
 			"directory": {
 				"type": "String"
@@ -658,6 +701,9 @@
 			},
 			"columnDelimiter": {
 				"type": "String"
+			},
+			"listFileName": {
+				"type": "Array"
 			}
 		},
 		"folder": {
