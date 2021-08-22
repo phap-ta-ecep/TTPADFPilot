@@ -6,7 +6,14 @@
 			{
 				"name": "End Notification",
 				"type": "WebActivity",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Store ADF Log",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -26,6 +33,74 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Store ADF Log",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_adfPipelineExcutions]",
+					"storedProcedureParameters": {
+						"adfName": {
+							"value": {
+								"value": "@pipeline().parameters.DataFactoryName",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"message": {
+							"value": {
+								"value": "@pipeline().parameters.ErrorMessage",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"pipelineName": {
+							"value": {
+								"value": "@pipeline().parameters.PipelineName",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"pipelineStatus": {
+							"value": "FA",
+							"type": "String"
+						},
+						"runId": {
+							"value": {
+								"value": "@pipeline().parameters.RunID",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"triggerName": {
+							"value": {
+								"value": "@pipeline().parameters.TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"triggerTime": {
+							"value": {
+								"value": "@pipeline().parameters.TriggerTime",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"parameters": {
@@ -39,6 +114,12 @@
 				"type": "string"
 			},
 			"RunID": {
+				"type": "string"
+			},
+			"TriggerName": {
+				"type": "string"
+			},
+			"TriggerTime": {
 				"type": "string"
 			}
 		},
