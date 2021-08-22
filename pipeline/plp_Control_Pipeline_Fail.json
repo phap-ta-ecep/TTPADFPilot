@@ -8,7 +8,7 @@
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Store ADF Log",
+						"activity": "ADF Pipeline Excutions Log",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -35,7 +35,7 @@
 				}
 			},
 			{
-				"name": "Store ADF Log",
+				"name": "ADF Pipeline Excutions Log",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [],
 				"policy": {
