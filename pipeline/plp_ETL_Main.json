@@ -173,6 +173,9 @@
 		"variables": {
 			"configId": {
 				"type": "String"
+			},
+			"errorMessages": {
+				"type": "Array"
 			}
 		},
 		"folder": {
