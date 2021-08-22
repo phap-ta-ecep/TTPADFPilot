@@ -1,0 +1,21 @@
+{
+	"name": "plp_Control_Pipeline_Fail",
+	"properties": {
+		"description": "If the pipeline is fail -> {send mail, log, ...}",
+		"activities": [
+			{
+				"name": "Wait1",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			}
+		],
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": []
+	}
+}
