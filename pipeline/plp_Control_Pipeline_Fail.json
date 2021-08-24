@@ -29,7 +29,7 @@
 						"Content-Type": "application/json"
 					},
 					"body": {
-						"value": "{\n\t\"Pipeline\":\"@{pipeline().parameters.PipelineName}\",\n\t\"ErrorMessage\":\"@{replace(replace(pipeline().parameters.ErrorMessage,'[',''),']','')}\",\n\t\"DataFactoryName\":\"@{pipeline().parameters.DataFactoryName}\",\n\t\"RunID\":\"@{pipeline().parameters.RunID}\"\n}",
+						"value": "{\n\t\"Pipeline\":\"@{pipeline().parameters.PipelineName}\",\n\t\"ErrorMessage\":\"@{pipeline().parameters.ErrorMessage}\",\n\t\"DataFactoryName\":\"@{pipeline().parameters.DataFactoryName}\",\n\t\"RunID\":\"@{pipeline().parameters.RunID}\"\n}",
 						"type": "Expression"
 					}
 				}
