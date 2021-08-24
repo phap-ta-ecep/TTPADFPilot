@@ -442,7 +442,7 @@
 										"typeProperties": {
 											"variableName": "errorMessage",
 											"value": {
-												"value": "@activity('Copy file to DB').output.errors[0].Message.Message",
+												"value": "@activity('Copy file to DB').Error.Message",
 												"type": "Expression"
 											}
 										}
