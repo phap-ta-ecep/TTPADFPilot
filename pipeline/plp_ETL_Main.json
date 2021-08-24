@@ -543,7 +543,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[dbo].[Pilot_MergeData]",
+											"storedProcedureName": "[ods].[usp_merge_process_wrapper]",
 											"storedProcedureParameters": {
 												"configId": {
 													"value": {
