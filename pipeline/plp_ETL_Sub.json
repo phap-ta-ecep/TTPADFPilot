@@ -428,8 +428,8 @@
 										}
 									},
 									{
-										"name": "Append errorMessage",
-										"type": "AppendVariable",
+										"name": "Set errorMessage",
+										"type": "SetVariable",
 										"dependsOn": [
 											{
 												"activity": "Copy file to DB",
@@ -1208,7 +1208,7 @@
 				"type": "Array"
 			},
 			"errorMessage": {
-				"type": "Array"
+				"type": "String"
 			}
 		},
 		"folder": {
