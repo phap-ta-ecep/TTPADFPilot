@@ -574,7 +574,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Exit  Megre Process By Have No File to ETL",
+							"name": "Exit by missing data or no ETL file",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -882,7 +882,7 @@
 				}
 			},
 			{
-				"name": "Check Count Of Current Date  Greater Than 0",
+				"name": "IF Count Of Current Date  Greater Than 0",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
