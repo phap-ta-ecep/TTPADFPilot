@@ -101,7 +101,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@equals(variables('isExtractFail'), 'true')",
+									"value": "@variables('isExtractFail')",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
@@ -185,18 +185,6 @@
 										"name": "Set isExtractFail  is True",
 										"type": "SetVariable",
 										"dependsOn": [
-											{
-												"activity": "Update status to TR",
-												"dependencyConditions": [
-													"Failed"
-												]
-											},
-											{
-												"activity": "Update data_file_guid to temp table",
-												"dependencyConditions": [
-													"Failed"
-												]
-											},
 											{
 												"activity": "Update status to EF",
 												"dependencyConditions": [
@@ -397,6 +385,46 @@
 										"linkedServiceName": {
 											"referenceName": "connectSQL",
 											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Set isExtractFail  is True_copy1",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Update status to TR",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isExtractFail",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Set isExtractFail  is True_copy2",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Update data_file_guid to temp table",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isExtractFail",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
 										}
 									}
 								],
