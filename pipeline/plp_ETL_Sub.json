@@ -895,7 +895,7 @@
 			},
 			"isExtractFail": {
 				"type": "Boolean",
-				"defaultValue": false
+				"defaultValue": "False"
 			},
 			"container": {
 				"type": "String"
