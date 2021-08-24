@@ -334,7 +334,7 @@
 																"type": "Int32"
 															},
 															"status": {
-																"value": null,
+																"value": "EF",
 																"type": "String"
 															}
 														}
@@ -396,7 +396,7 @@
 																"type": "Int32"
 															},
 															"status": {
-																"value": null,
+																"value": "TR",
 																"type": "String"
 															}
 														}
