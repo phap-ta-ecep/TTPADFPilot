@@ -90,6 +90,12 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "Set columnDelimiter",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
 							],
 							"userProperties": [],
@@ -176,185 +182,35 @@
 										]
 									},
 									{
-										"name": "Update status to EF",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [
-											{
-												"activity": "Set isExtractFail  is True",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
-											"storedProcedureParameters": {
-												"fileName": {
-													"value": {
-														"value": "@variables('fileName')",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"pipeline_run_id": {
-													"value": {
-														"value": "@pipeline().RunId",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"source_count": {
-													"value": {
-														"value": "0",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"staging_load_count": {
-													"value": {
-														"value": "0",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"status": {
-													"value": "EF",
-													"type": "String"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "connectSQL",
-											"type": "LinkedServiceReference"
-										}
-									},
-									{
 										"name": "Set isExtractFail  is True",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "Copy file to DB",
+												"activity": "Update status to TR",
 												"dependencyConditions": [
 													"Failed"
+												]
+											},
+											{
+												"activity": "Update data_file_guid to temp table",
+												"dependencyConditions": [
+													"Failed"
+												]
+											},
+											{
+												"activity": "Update status to EF",
+												"dependencyConditions": [
+													"Completed"
 												]
 											}
 										],
 										"userProperties": [],
 										"typeProperties": {
 											"variableName": "isExtractFail",
-											"value": true
-										}
-									},
-									{
-										"name": "Move File to Error Folder",
-										"type": "ExecutePipeline",
-										"dependsOn": [
-											{
-												"activity": "Update status to EF",
-												"dependencyConditions": [
-													"Succeeded"
-												]
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
 											}
-										],
-										"userProperties": [],
-										"typeProperties": {
-											"pipeline": {
-												"referenceName": "plp_Move_File",
-												"type": "PipelineReference"
-											},
-											"waitOnCompletion": true,
-											"parameters": {
-												"container": {
-													"value": "@variables('container')",
-													"type": "Expression"
-												},
-												"sourceDirectory": {
-													"value": "@variables('directory')",
-													"type": "Expression"
-												},
-												"desDirectory": {
-													"value": "@variables('errorDirectory')",
-													"type": "Expression"
-												},
-												"listFileName": {
-													"value": "@array(variables('fileName'))",
-													"type": "Expression"
-												},
-												"columDelimiter": {
-													"value": "@variables('columnDelimiter')",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									{
-										"name": "Update status to TR",
-										"description": "TR : transfrom ready",
-										"type": "SqlServerStoredProcedure",
-										"dependsOn": [
-											{
-												"activity": "Copy file to DB",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
-											"storedProcedureParameters": {
-												"fileName": {
-													"value": {
-														"value": "@variables('fileName')",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"pipeline_run_id": {
-													"value": {
-														"value": "@pipeline().RunId",
-														"type": "Expression"
-													},
-													"type": "String"
-												},
-												"source_count": {
-													"value": {
-														"value": "@activity('Copy file to DB').output.rowsRead",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"staging_load_count": {
-													"value": {
-														"value": "@activity('Copy file to DB').output.rowsCopied",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"status": {
-													"value": "TR",
-													"type": "String"
-												}
-											}
-										},
-										"linkedServiceName": {
-											"referenceName": "connectSQL",
-											"type": "LinkedServiceReference"
 										}
 									},
 									{
@@ -411,6 +267,129 @@
 														"value": "@concat(variables('tableSchema'), '.' , variables('tableName'))",
 														"type": "Expression"
 													},
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Update status to EF",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Copy file to DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureParameters": {
+												"fileName": {
+													"value": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"pipeline_run_id": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"source_count": {
+													"value": {
+														"value": "0",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"staging_load_count": {
+													"value": {
+														"value": "0",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"status": {
+													"value": "EF",
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Update status to TR",
+										"description": "TR : transfrom ready",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "Copy file to DB",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureParameters": {
+												"fileName": {
+													"value": {
+														"value": "@variables('fileName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"pipeline_run_id": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"source_count": {
+													"value": {
+														"value": "@activity('Copy file to DB').output.rowsRead",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"staging_load_count": {
+													"value": {
+														"value": "@activity('Copy file to DB').output.rowsCopied",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"status": {
+													"value": "TR",
 													"type": "String"
 												}
 											}
@@ -508,6 +487,19 @@
 								"variableName": "errorDirectory",
 								"value": {
 									"value": "@item().error_dir",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set columnDelimiter",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "columnDelimiter",
+								"value": {
+									"value": "@item().delimiter",
 									"type": "Expression"
 								}
 							}
@@ -809,6 +801,83 @@
 										"type": "Expression"
 									}
 								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Extract Fail",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Check Current-Up-To With File DateTime",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('isExtractFail')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Wait1_copy1",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Refresh  status file to ER",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureParameters": {
+									"fileName": {
+										"value": null,
+										"type": "String"
+									},
+									"pipeline_run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"source_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"staging_load_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"status": {
+										"value": "RF",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
 							}
 						}
 					]
