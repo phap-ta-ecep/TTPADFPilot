@@ -207,10 +207,7 @@
 										"userProperties": [],
 										"typeProperties": {
 											"variableName": "isExtractFail",
-											"value": {
-												"value": "@bool(1)",
-												"type": "Expression"
-											}
+											"value": true
 										}
 									},
 									{
