@@ -188,7 +188,7 @@
 											{
 												"activity": "Update status to EF",
 												"dependencyConditions": [
-													"Succeeded"
+													"Completed"
 												]
 											}
 										],
@@ -423,6 +423,26 @@
 											"variableName": "isExtractFail",
 											"value": {
 												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Append errorMessage",
+										"type": "AppendVariable",
+										"dependsOn": [
+											{
+												"activity": "Copy file to DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "errorMessage",
+											"value": {
+												"value": "@activity('Copy file to DB').output.errors.Message",
 												"type": "Expression"
 											}
 										}
@@ -1182,6 +1202,9 @@
 				"type": "String"
 			},
 			"listFileName": {
+				"type": "Array"
+			},
+			"errorMessage": {
 				"type": "Array"
 			}
 		},
