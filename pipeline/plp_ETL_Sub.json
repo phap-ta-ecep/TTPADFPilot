@@ -686,6 +686,101 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "Refresh  status file to ER_2",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Merge data from temp to ODS",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureParameters": {
+									"fileName": {
+										"value": null,
+										"type": "String"
+									},
+									"pipeline_run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"source_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"staging_load_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"status": {
+										"value": "RF",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Write log and send mail - merge data",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Refresh  status file to ER_2",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "plp_Control_Pipeline_Fail",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"DataFactoryName": {
+										"value": "@pipeline().DataFactory",
+										"type": "Expression"
+									},
+									"ErrorMessage": "Merge got Error",
+									"RunID": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"TriggerTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									}
+								}
+							}
 						}
 					]
 				}
@@ -734,7 +829,7 @@
 					{
 						"activity": "ForEach to Extract From File To DB",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -841,7 +936,7 @@
 					{
 						"activity": "ForEach to Extract From File To DB",
 						"dependencyConditions": [
-							"Completed"
+							"Failed"
 						]
 					}
 				],
@@ -853,7 +948,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Wait1_copy1",
+							"name": "Extract Files Completed",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -907,8 +1002,146 @@
 								"referenceName": "connectSQL",
 								"type": "LinkedServiceReference"
 							}
+						},
+						{
+							"name": "Write log and send mail - extract fail",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Refresh  status file to ER",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "plp_Control_Pipeline_Fail",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"DataFactoryName": {
+										"value": "@pipeline().DataFactory",
+										"type": "Expression"
+									},
+									"ErrorMessage": "N/A",
+									"RunID": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"TriggerTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									}
+								}
+							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Write log and send mail - current up to",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Check Current-Up-To With File DateTime",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_Control_Pipeline_Fail",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineName": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"DataFactoryName": {
+							"value": "@pipeline().DataFactory",
+							"type": "Expression"
+						},
+						"ErrorMessage": "Check current up to date false",
+						"RunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().TriggerName",
+							"type": "Expression"
+						},
+						"TriggerTime": {
+							"value": "@pipeline().TriggerTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Refresh  status file to ER_1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Write log and send mail - current up to",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+					"storedProcedureParameters": {
+						"fileName": {
+							"value": null,
+							"type": "String"
+						},
+						"pipeline_run_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"source_count": {
+							"value": null,
+							"type": "Int32"
+						},
+						"staging_load_count": {
+							"value": null,
+							"type": "Int32"
+						},
+						"status": {
+							"value": "RF",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
