@@ -703,7 +703,7 @@
 					{
 						"activity": "ForEach to Extract From File To DB",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
@@ -808,9 +808,9 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Check Current-Up-To With File DateTime",
+						"activity": "ForEach to Extract From File To DB",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
