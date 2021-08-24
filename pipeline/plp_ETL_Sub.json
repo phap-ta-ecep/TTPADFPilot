@@ -536,7 +536,7 @@
 				}
 			},
 			{
-				"name": "If Condition for Merge Data",
+				"name": "Check To Merge Data",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -554,7 +554,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Exit By Have No File to ETL",
+							"name": "Exit  Megre Process By Have No File to ETL",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -767,7 +767,7 @@
 				}
 			},
 			{
-				"name": "Send Notification If Check Count Greater Than 0",
+				"name": "Check Count Of Current Date  Greater Than 0",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
