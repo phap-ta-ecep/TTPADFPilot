@@ -786,7 +786,7 @@
 										"value": "@pipeline().DataFactory",
 										"type": "Expression"
 									},
-									"ErrorMessage": "Merge got Error",
+									"ErrorMessage": "Activity 'Merge data from temp to ODS' is Fail",
 									"RunID": {
 										"value": "@pipeline().RunId",
 										"type": "Expression"
@@ -1050,7 +1050,10 @@
 										"value": "@pipeline().DataFactory",
 										"type": "Expression"
 									},
-									"ErrorMessage": "N/A",
+									"ErrorMessage": {
+										"value": "@string(variables('errorMessage'))",
+										"type": "Expression"
+									},
 									"RunID": {
 										"value": "@pipeline().RunId",
 										"type": "Expression"
@@ -1096,7 +1099,7 @@
 							"value": "@pipeline().DataFactory",
 							"type": "Expression"
 						},
-						"ErrorMessage": "Check current up to date false",
+						"ErrorMessage": "Activity 'Check Current Up To With File Date Time' Fail",
 						"RunID": {
 							"value": "@pipeline().RunId",
 							"type": "Expression"
