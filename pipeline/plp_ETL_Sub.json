@@ -200,14 +200,17 @@
 											{
 												"activity": "Update status to EF",
 												"dependencyConditions": [
-													"Completed"
+													"Succeeded"
 												]
 											}
 										],
 										"userProperties": [],
 										"typeProperties": {
 											"variableName": "isExtractFail",
-											"value": "true"
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
 										}
 									},
 									{
@@ -518,7 +521,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(and( equals(variables('isExtractFail'), 'false') , greater(activity('Check file_status ER').output.count, 0)),\nequals(activity('Check Current-Up-To With File DateTime').output.firstRow.Ncount, 0)\n)",
+						"value": "@and(and( not(variables('isExtractFail')) , greater(activity('Check file_status ER').output.count, 0)),\nequals(activity('Check Current-Up-To With File DateTime').output.firstRow.Ncount, 0)\n)",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -817,7 +820,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(variables('isExtractFail'), 'true')",
+						"value": "@variables('isExtractFail')",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -894,8 +897,8 @@
 				"type": "String"
 			},
 			"isExtractFail": {
-				"type": "String",
-				"defaultValue": "false"
+				"type": "Boolean",
+				"defaultValue": false
 			},
 			"container": {
 				"type": "String"
