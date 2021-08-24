@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT data_file_config_id, data_file_config_name,\ndata_file_target_schema,data_file_target_table,\ncontainer_dir,import_dir,success_dir,error_dir\nFROM  [CONTROL].[DATA_FILE_CONFIGURATION] where data_file_config_id in (1,2)",
+							"value": "SELECT data_file_config_id, data_file_config_name,\ndata_file_target_schema,data_file_target_table,\ncontainer_dir,import_dir,success_dir,error_dir\nFROM  [CONTROL].[DATA_FILE_CONFIGURATION] where data_file_config_id in (@{pipeline().parameters.listConfigId})",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
