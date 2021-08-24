@@ -913,7 +913,14 @@
 						{
 							"name": "Execute Pipeline To Send Notification",
 							"type": "ExecutePipeline",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Refresh  status file to ER_crd_greater_0",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -944,6 +951,51 @@
 										"type": "Expression"
 									}
 								}
+							}
+						},
+						{
+							"name": "Refresh  status file to ER_crd_greater_0",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureParameters": {
+									"fileName": {
+										"value": null,
+										"type": "String"
+									},
+									"pipeline_run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"source_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"staging_load_count": {
+										"value": null,
+										"type": "Int32"
+									},
+									"status": {
+										"value": "RF",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
 							}
 						}
 					]
