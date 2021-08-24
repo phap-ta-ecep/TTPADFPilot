@@ -209,6 +209,18 @@
 															"dependencyConditions": [
 																"Failed"
 															]
+														},
+														{
+															"activity": "Update status to TR",
+															"dependencyConditions": [
+																"Failed"
+															]
+														},
+														{
+															"activity": "Update data_file_guid to temp table",
+															"dependencyConditions": [
+																"Failed"
+															]
 														}
 													],
 													"userProperties": [],
