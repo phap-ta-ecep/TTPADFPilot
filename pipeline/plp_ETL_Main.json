@@ -205,12 +205,6 @@
 													"type": "SetVariable",
 													"dependsOn": [
 														{
-															"activity": "Copy file to DB",
-															"dependencyConditions": [
-																"Failed"
-															]
-														},
-														{
 															"activity": "Update status to TR",
 															"dependencyConditions": [
 																"Failed"
@@ -220,6 +214,12 @@
 															"activity": "Update data_file_guid to temp table",
 															"dependencyConditions": [
 																"Failed"
+															]
+														},
+														{
+															"activity": "Update status to EF",
+															"dependencyConditions": [
+																"Completed"
 															]
 														}
 													],
@@ -300,9 +300,9 @@
 													"type": "SqlServerStoredProcedure",
 													"dependsOn": [
 														{
-															"activity": "Set isExtractFail  is True",
+															"activity": "Copy file to DB",
 															"dependencyConditions": [
-																"Succeeded"
+																"Failed"
 															]
 														}
 													],
