@@ -597,7 +597,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[Pilot_MergeData]",
+								"storedProcedureName": "[dbo].[usp_merge_process_wrapper]",
 								"storedProcedureParameters": {
 									"configId": {
 										"value": {
