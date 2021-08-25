@@ -597,7 +597,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[usp_merge_process_wrapper]",
+								"storedProcedureName": "[ods].[usp_merge_process_wrapper]",
 								"storedProcedureParameters": {
 									"configId": {
 										"value": {
@@ -605,6 +605,13 @@
 											"type": "Expression"
 										},
 										"type": "Int32"
+									},
+									"ExecutionLogId": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
 									}
 								}
 							},
