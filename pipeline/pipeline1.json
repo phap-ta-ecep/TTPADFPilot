@@ -3,8 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Check Current-Up-To With File DateTime",
-				"type": "Lookup",
+				"name": "Copy data1",
+				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -17,14 +17,29 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": {
-							"value": "DECLARE @Ncount INT;\nEXEC dbo.CheckDataCurrentUpToDate  3, @Ncount OUTPUT;\nSELECT @Ncount AS Ncount;",
-							"type": "Expression"
-						},
+						"sqlReaderQuery": "select * from [ods].[ImpactArea] where IsDeleted = 1;",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
-					"dataset": {
+					"sink": {
+						"type": "AzureSqlSink",
+						"sqlWriterStoredProcedureName": "[stg].[usp_transfer_Board_ImpactArea]",
+						"sqlWriterTableType": "ImpactAreaType",
+						"storedProcedureTableTypeParameterName": "source",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
 						"referenceName": "DS_Pilot_SQL_Broad",
 						"type": "DatasetReference",
 						"parameters": {
@@ -32,7 +47,13 @@
 							"schema": "Null"
 						}
 					}
-				}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Pilot_SQL_STG_Broad",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"parameters": {

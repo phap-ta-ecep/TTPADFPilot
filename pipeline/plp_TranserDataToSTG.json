@@ -84,16 +84,7 @@
 								],
 								"ifTrueActivities": [
 									{
-										"name": "TR-1-2-1- Start transfer data to STG",
-										"type": "Wait",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"waitTimeInSeconds": 1
-										}
-									},
-									{
-										"name": "Copy data1",
+										"name": "TR-1-2-1-Copy data from ODS to STG",
 										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
@@ -107,6 +98,7 @@
 										"typeProperties": {
 											"source": {
 												"type": "AzureSqlSource",
+												"sqlReaderQuery": "",
 												"queryTimeout": "02:00:00",
 												"partitionOption": "None"
 											},
@@ -122,6 +114,62 @@
 												}
 											}
 										]
+									},
+									{
+										"name": "TR-1-2-2-Update status transfer to successful",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "TR-1-2-1-Copy data from ODS to STG",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": []
+									},
+									{
+										"name": "TR-1-2-3-Update status transfer to error",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "TR-1-2-1-Copy data from ODS to STG",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": []
+									},
+									{
+										"name": "TR-1-2-4-Pipeline to control error",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "TR-1-2-3-Update status transfer to error",
+												"dependencyConditions": [
+													"Completed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"waitOnCompletion": true
+										}
 									}
 								]
 							}
