@@ -606,7 +606,7 @@
 										},
 										"type": "Int32"
 									},
-									"ExecutionLogId": {
+									"runId": {
 										"value": {
 											"value": "@pipeline().RunId",
 											"type": "Expression"

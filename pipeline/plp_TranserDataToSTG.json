@@ -15,7 +15,7 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "TR-1-2-Lookup-The Data Has Changed",
+							"name": "TR-1-2-Get lastest transfer and current executionLogId",
 							"type": "Lookup",
 							"dependsOn": [
 								{
@@ -59,7 +59,7 @@
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "TR-1-2-Lookup-The Data Has Changed",
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
 									"dependencyConditions": [
 										"Succeeded"
 									]
