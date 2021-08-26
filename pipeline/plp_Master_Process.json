@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Insert new files to control data-file",
+				"name": "MP-1-Insert new files to control data-file",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
@@ -22,11 +22,11 @@
 				}
 			},
 			{
-				"name": "Extract files to DB",
+				"name": "MP-2-Extract files to ODS",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Insert new files to control data-file",
+						"activity": "MP-1-Insert new files to control data-file",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -48,11 +48,11 @@
 				}
 			},
 			{
-				"name": "Transfer data from ods to stg",
+				"name": "MP-3-Transfer data from ods to stg",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Extract files to DB",
+						"activity": "MP-2-Extract files to ODS",
 						"dependencyConditions": [
 							"Succeeded"
 						]

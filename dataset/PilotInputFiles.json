@@ -13,9 +13,6 @@
 				"type": "string"
 			}
 		},
-		"folder": {
-			"name": "Pilot"
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
