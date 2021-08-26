@@ -370,7 +370,7 @@
 							"typeProperties": {
 								"variableName": "startExecutionId",
 								"value": {
-									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].startExecutionId",
+									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].startExecutionId)",
 									"type": "Expression"
 								}
 							}
@@ -390,7 +390,7 @@
 							"typeProperties": {
 								"variableName": "endExcutionId",
 								"value": {
-									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].endExecutionId",
+									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].endExecutionId)",
 									"type": "Expression"
 								}
 							}
