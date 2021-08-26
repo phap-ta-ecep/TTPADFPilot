@@ -103,7 +103,7 @@
 								},
 								"ifFalseActivities": [
 									{
-										"name": "TR-1-2-1- Exit by no data has changed",
+										"name": "TR-1-3-1- Exit by no data has changed",
 										"type": "Wait",
 										"dependsOn": [],
 										"userProperties": [],
@@ -479,44 +479,35 @@
 				}
 			},
 			{
-				"name": "TR-2-IF-Transfer got error",
-				"type": "IfCondition",
+				"name": "TR-2-2- No error in transfer",
+				"type": "Wait",
 				"dependsOn": [
 					{
 						"activity": "TR-1-ForEach-ListConfigId",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"expression": {
-						"value": "@variables('isTransferError')",
-						"type": "Expression"
-					},
-					"ifFalseActivities": [
-						{
-							"name": "TR-2-2- No error in transfer",
-							"type": "Wait",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "TR-2-1- Got error in transfer",
-							"type": "Wait",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						}
-					]
+					"waitTimeInSeconds": 1
+				}
+			},
+			{
+				"name": "TR-2-1- Got error in transfer",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TR-1-ForEach-ListConfigId",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
 				}
 			}
 		],
