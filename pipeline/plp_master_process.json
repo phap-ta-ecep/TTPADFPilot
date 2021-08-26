@@ -1,0 +1,96 @@
+{
+	"name": "plp_master_process",
+	"properties": {
+		"activities": [
+			{
+				"name": "Insert new files to control data-file",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_InsertFileToControl_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"listConfigId": {
+							"value": "@pipeline().parameters.listConfigId_S",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Extract files to DB",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Insert new files to control data-file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_ETL_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"listConfigId": {
+							"value": "@pipeline().parameters.listConfigId_Ar",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Transfer data from ods to stg",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Extract files to DB",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_TranserDataToSTG",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"listConfigId_S": {
+				"type": "string",
+				"defaultValue": "1,2,3,4,5,6,7,8,9"
+			},
+			"listConfigId_Ar": {
+				"type": "array",
+				"defaultValue": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9"
+				]
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": []
+	}
+}
