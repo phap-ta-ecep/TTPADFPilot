@@ -46,6 +46,47 @@
 								},
 								"firstRowOnly": false
 							}
+						},
+						{
+							"name": "TR-1-2-IF- Data has changed",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "TR-1-1-Lookup-The Data Has Changed",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(activity('TR-1-1-Lookup-The Data Has Changed').output.value[0].endExecutionId , activity('TR-1-1-Lookup-The Data Has Changed').output.value[0].startExecutionId)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "TR-1-2-1- Exit by no data has changed",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "TR-1-2-1- Start transfer data to STG",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								]
+							}
 						}
 					]
 				}
@@ -61,6 +102,12 @@
 		},
 		"variables": {
 			"configId": {
+				"type": "String"
+			},
+			"startExecutionId": {
+				"type": "String"
+			},
+			"endExcutionId": {
 				"type": "String"
 			}
 		},
