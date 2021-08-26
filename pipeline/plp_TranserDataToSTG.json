@@ -37,7 +37,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nEXEC [dbo].[CheckDataIsChanged] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId ",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @dataFileType varchar(2);\nDECLARE @odsTableName varchar(30); \nEXEC [dbo].[CheckDataIsChanged] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @dataFileType  OUTPUT, @odsTableName OUTPUT\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId,\n@dataFileType AS dataFileType, @odsTableName AS odsTableName",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -59,7 +59,25 @@
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"activity": "TR-1-2-1- Set variable startExecutionId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-3- Set variable dataFileType",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-4- Set variable odsTableName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-2- Set variable endExecutionId",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -202,6 +220,86 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "TR-1-2-1- Set variable startExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "startExecutionId",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value.startExecutionId",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-2- Set variable endExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "endExcutionId",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value.endExecutionId",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-3- Set variable dataFileType",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "dataFileType",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value.dataFileType",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-4- Set variable odsTableName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "odsTableName",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value.odsTableName",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -285,6 +383,12 @@
 			"isTransferError": {
 				"type": "Boolean",
 				"defaultValue": false
+			},
+			"dataFileType": {
+				"type": "String"
+			},
+			"odsTableName": {
+				"type": "String"
 			}
 		},
 		"folder": {
