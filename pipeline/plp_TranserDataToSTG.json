@@ -37,7 +37,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @dataFileType varchar(2);\nDECLARE @odsTableName varchar(30); \nEXEC [dbo].[CheckDataIsChanged] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @dataFileType  OUTPUT, @odsTableName OUTPUT\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId,\n@dataFileType AS dataFileType, @odsTableName AS odsTableName",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @dataFileType varchar(2);\nDECLARE @odsTableName varchar(30);\nDECLARE @tableType varchar(30) ;\nDECLARE @transferStoreProcedureName varchar(50) ;\n \nEXEC [dbo].[CheckDataIsChanged] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT,\n@dataFileType  OUTPUT, \n@odsTableName OUTPUT,\n@tableType OUTPUT,\n@transferStoreProcedureName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , \n@endExecutionId  AS endExecutionId,\n@dataFileType AS dataFileType, \n@odsTableName AS odsTableName,\n@tableType  AS tableType  ,\n@transferStoreProcedureName AS transferStoreProcedureName",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
