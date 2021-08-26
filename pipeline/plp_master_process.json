@@ -1,0 +1,50 @@
+{
+	"name": "plp_master_process",
+	"properties": {
+		"activities": [
+			{
+				"name": "Insert new files to control data-file",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_InsertFileToControl_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"listConfigId": "1,2,3,4,,5,6,7,8,9"
+					}
+				}
+			},
+			{
+				"name": "Extract files to DB",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Insert new files to control data-file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_ETL_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"listConfigId": "[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": []
+	}
+}
