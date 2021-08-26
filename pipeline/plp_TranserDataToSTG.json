@@ -128,7 +128,7 @@
 										"typeProperties": {
 											"source": {
 												"type": "AzureSqlSource",
-												"sqlReaderStoredProcedureName": "[stg].[usp_transer_process_wrapper]",
+												"sqlReaderStoredProcedureName": "[ods].[usp_transer_process_wrapper]",
 												"storedProcedureParameters": {
 													"configId": {
 														"type": "Int32",
