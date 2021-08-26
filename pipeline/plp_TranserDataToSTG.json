@@ -84,7 +84,7 @@
 								],
 								"ifTrueActivities": [
 									{
-										"name": "TR-1-2-1-Copy data from ODS to STG",
+										"name": "TR-1-3-1-Copy data from ODS to STG",
 										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
@@ -116,11 +116,11 @@
 										]
 									},
 									{
-										"name": "TR-1-2-2-Update status transfer to successful",
+										"name": "TR-1-3-2-Update status transfer to successful",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "TR-1-2-1-Copy data from ODS to STG",
+												"activity": "TR-1-3-1-Copy data from ODS to STG",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -136,11 +136,11 @@
 										"userProperties": []
 									},
 									{
-										"name": "TR-1-2-3-Update status transfer to error",
+										"name": "TR-1-3-3-Update status transfer to error",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "TR-1-2-1-Copy data from ODS to STG",
+												"activity": "TR-1-3-1-Copy data from ODS to STG",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -156,13 +156,29 @@
 										"userProperties": []
 									},
 									{
-										"name": "TR-1-2-4-Pipeline to control error",
+										"name": "TR-1-3-5-Pipeline to control error",
 										"type": "ExecutePipeline",
 										"dependsOn": [
 											{
-												"activity": "TR-1-2-3-Update status transfer to error",
+												"activity": "TR-1-3-3-Update status transfer to error",
 												"dependencyConditions": [
 													"Completed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"waitOnCompletion": true
+										}
+									},
+									{
+										"name": "TR-1-3-4- Set variable isTransferError to True",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "TR-1-3-1-Copy data from ODS to STG",
+												"dependencyConditions": [
+													"Failed"
 												]
 											}
 										],
@@ -208,6 +224,10 @@
 			},
 			"endExcutionId": {
 				"type": "String"
+			},
+			"isTransferError": {
+				"type": "Boolean",
+				"defaultValue": false
 			}
 		},
 		"folder": {
