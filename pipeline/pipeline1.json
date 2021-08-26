@@ -17,14 +17,20 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select * from [ods].[ImpactArea] where IsDeleted = 0;",
+						"sqlReaderStoredProcedureName": "[dbo].[testTranser]",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"sqlWriterStoredProcedureName": "[stg].[usp_transfer_Board_ImpactArea]",
-						"sqlWriterTableType": "ImpactAreaType",
+						"sqlWriterStoredProcedureName": {
+							"value": "@variables('storeProcedure')",
+							"type": "Expression"
+						},
+						"sqlWriterTableType": {
+							"value": "@variables('tableType')",
+							"type": "Expression"
+						},
 						"storedProcedureTableTypeParameterName": "source",
 						"disableMetricsCollection": false
 					},
@@ -60,6 +66,20 @@
 			"configId": {
 				"type": "string",
 				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"configId": {
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"storeProcedure": {
+				"type": "String",
+				"defaultValue": "[stg].[usp_transfer_Board_ImpactArea]"
+			},
+			"tableType": {
+				"type": "String",
+				"defaultValue": "ImpactAreaType"
 			}
 		},
 		"annotations": []

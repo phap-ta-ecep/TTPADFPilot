@@ -116,11 +116,59 @@
 										"typeProperties": {
 											"source": {
 												"type": "AzureSqlSource",
-												"sqlReaderQuery": "",
+												"sqlReaderStoredProcedureName": "[stg].[usp_transer_process_wrapper]",
+												"storedProcedureParameters": {
+													"configId": {
+														"type": "Int32",
+														"value": {
+															"value": "@variables('configId')",
+															"type": "Expression"
+														}
+													},
+													"dataFileType": {
+														"type": "String",
+														"value": {
+															"value": "@variables('dataFileType')",
+															"type": "Expression"
+														}
+													},
+													"endExecutionId": {
+														"type": "Int32",
+														"value": {
+															"value": "@variables('endExcutionId')",
+															"type": "Expression"
+														}
+													},
+													"odsTableName": {
+														"type": "String",
+														"value": {
+															"value": "@variables('odsTableName')",
+															"type": "Expression"
+														}
+													},
+													"startExecutionId": {
+														"type": "Int32",
+														"value": {
+															"value": "@variables('startExecutionId')",
+															"type": "Expression"
+														}
+													}
+												},
 												"queryTimeout": "02:00:00",
 												"partitionOption": "None"
 											},
-											"enableStaging": false
+											"sink": {
+												"type": "AzureSqlSink"
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
 										},
 										"inputs": [
 											{
@@ -130,6 +178,12 @@
 													"tableName": "Null",
 													"schema": "Null"
 												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_Pilot_SQL_STG_Broad",
+												"type": "DatasetReference"
 											}
 										]
 									},
