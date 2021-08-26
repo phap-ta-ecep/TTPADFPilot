@@ -68,7 +68,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(activity('TR-1-2-Lookup-The Data Has Changed').output.value[0].endExecutionId , activity('TR-1-2-Lookup-The Data Has Changed').output.value[0].startExecutionId)",
+									"value": "@greater(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].endExecutionId , activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].startExecutionId)\n",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
@@ -204,6 +204,63 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "TR-2-IF-Transfer got error",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "TR-1-ForEach-ListConfigId",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('isTransferError')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "TR-1-2-2- No error in transfer",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "TR-1-2-1- Got error in transfer",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "TR-3-Execute Pipeline to control fail",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "TR-1-ForEach-ListConfigId",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
 				}
 			}
 		],
