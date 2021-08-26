@@ -1,0 +1,15 @@
+{
+	"name": "DS_Pilot_SQL_STG_Broad",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Connect_STG",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
