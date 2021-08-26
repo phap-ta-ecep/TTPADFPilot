@@ -81,6 +81,18 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "TR-1-2-5- Set variable tableType",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-4- Set variable transferStoreProcedureName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
 							],
 							"userProperties": [],
@@ -158,7 +170,17 @@
 												"partitionOption": "None"
 											},
 											"sink": {
-												"type": "AzureSqlSink"
+												"type": "AzureSqlSink",
+												"sqlWriterStoredProcedureName": {
+													"value": "@variables('transferStoreProcedureName')",
+													"type": "Expression"
+												},
+												"sqlWriterTableType": {
+													"value": "@variables('tableType')",
+													"type": "Expression"
+												},
+												"storedProcedureTableTypeParameterName": "source",
+												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
 											"translator": {
@@ -354,6 +376,46 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "TR-1-2-5- Set variable tableType",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableType",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value.tableType",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-4- Set variable transferStoreProcedureName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "transferStoreProcedureName",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value.transferStoreProcedureName",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -442,6 +504,12 @@
 				"type": "String"
 			},
 			"odsTableName": {
+				"type": "String"
+			},
+			"tableType": {
+				"type": "String"
+			},
+			"transferStoreProcedureName": {
 				"type": "String"
 			}
 		},
