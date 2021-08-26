@@ -40,6 +40,22 @@
 						"listConfigId": "[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
 					}
 				}
+			},
+			{
+				"name": "Transfer data from ods to stg",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Extract files to DB",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"folder": {
