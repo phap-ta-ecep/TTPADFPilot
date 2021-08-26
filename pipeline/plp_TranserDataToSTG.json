@@ -15,9 +15,16 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "TR-1-1-Lookup-The Data Has Changed",
+							"name": "TR-1-2-Lookup-The Data Has Changed",
 							"type": "Lookup",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "TR-1-1- Set variable configId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -30,7 +37,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nEXEC [dbo].[CheckDataIsChanged] @{item()}, @startExecutionId OUTPUT, @endExecutionId OUTPUT\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId ",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nEXEC [dbo].[CheckDataIsChanged] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId ",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -48,11 +55,11 @@
 							}
 						},
 						{
-							"name": "TR-1-2-IF- Data has changed",
+							"name": "TR-1-3-IF- Data has changed",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "TR-1-1-Lookup-The Data Has Changed",
+									"activity": "TR-1-2-Lookup-The Data Has Changed",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -61,7 +68,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(activity('TR-1-1-Lookup-The Data Has Changed').output.value[0].endExecutionId , activity('TR-1-1-Lookup-The Data Has Changed').output.value[0].startExecutionId)",
+									"value": "@greater(activity('TR-1-2-Lookup-The Data Has Changed').output.value[0].endExecutionId , activity('TR-1-2-Lookup-The Data Has Changed').output.value[0].startExecutionId)",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
@@ -86,6 +93,19 @@
 										}
 									}
 								]
+							}
+						},
+						{
+							"name": "TR-1-1- Set variable configId",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "configId",
+								"value": {
+									"value": "@item()",
+									"type": "Expression"
+								}
 							}
 						}
 					]
