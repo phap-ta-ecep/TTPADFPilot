@@ -89,7 +89,7 @@
 									]
 								},
 								{
-									"activity": "TR-1-2-4- Set variable transferStoreProcedureName",
+									"activity": "TR-1-2-6- Set variable transferStoreProcedureName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -456,7 +456,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-4- Set variable transferStoreProcedureName",
+							"name": "TR-1-2-6- Set variable transferStoreProcedureName",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
