@@ -14,7 +14,10 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"listConfigId": "1,2,3,4,,5,6,7,8,9"
+						"listConfigId": {
+							"value": "@pipeline().parameters.listConfigId_S",
+							"type": "Expression"
+						}
 					}
 				}
 			},
@@ -37,7 +40,10 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"listConfigId": "[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+						"listConfigId": {
+							"value": "@pipeline().parameters.listConfigId_Ar",
+							"type": "Expression"
+						}
 					}
 				}
 			},
@@ -62,6 +68,26 @@
 				}
 			}
 		],
+		"parameters": {
+			"listConfigId_S": {
+				"type": "string",
+				"defaultValue": "1,2,3,4,5,6,7,8,9"
+			},
+			"listConfigId_Ar": {
+				"type": "array",
+				"defaultValue": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9"
+				]
+			}
+		},
 		"folder": {
 			"name": "Pilot"
 		},
