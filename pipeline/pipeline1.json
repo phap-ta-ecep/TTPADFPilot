@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select * from [ods].[ImpactArea] where IsDeleted = 1;",
+						"sqlReaderQuery": "select * from [ods].[ImpactArea] where IsDeleted = 0;",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
