@@ -497,7 +497,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "TR-1-2-2- No error in transfer",
+							"name": "TR-2-2- No error in transfer",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -508,7 +508,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "TR-1-2-1- Got error in transfer",
+							"name": "TR-2-1- Got error in transfer",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -517,22 +517,6 @@
 							}
 						}
 					]
-				}
-			},
-			{
-				"name": "TR-3-Execute Pipeline to control fail",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "TR-1-ForEach-ListConfigId",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"waitOnCompletion": true
 				}
 			}
 		],
