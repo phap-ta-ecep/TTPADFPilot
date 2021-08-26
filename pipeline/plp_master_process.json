@@ -54,6 +54,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_TranserDataToSTG",
+						"type": "PipelineReference"
+					},
 					"waitOnCompletion": true
 				}
 			}
