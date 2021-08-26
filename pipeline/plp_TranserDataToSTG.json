@@ -262,12 +262,42 @@
 										],
 										"userProperties": [],
 										"typeProperties": {
-											"waitOnCompletion": true
+											"pipeline": {
+												"referenceName": "plp_Control_Pipeline_Fail",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"PipelineName": {
+													"value": "@pipeline().Pipeline",
+													"type": "Expression"
+												},
+												"DataFactoryName": {
+													"value": "@pipeline().DataFactory",
+													"type": "Expression"
+												},
+												"ErrorMessage": {
+													"value": "@activity('TR-1-3-1-Copy data from ODS to STG').output.errors.Message",
+													"type": "Expression"
+												},
+												"RunID": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"TriggerName": {
+													"value": "@pipeline().TriggerName",
+													"type": "Expression"
+												},
+												"TriggerTime": {
+													"value": "@pipeline().TriggerTime",
+													"type": "Expression"
+												}
+											}
 										}
 									},
 									{
 										"name": "TR-1-3-4- Set variable isTransferError to True",
-										"type": "ExecutePipeline",
+										"type": "SetVariable",
 										"dependsOn": [
 											{
 												"activity": "TR-1-3-1-Copy data from ODS to STG",
@@ -278,7 +308,11 @@
 										],
 										"userProperties": [],
 										"typeProperties": {
-											"waitOnCompletion": true
+											"variableName": "isTransferError",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
 										}
 									}
 								]
