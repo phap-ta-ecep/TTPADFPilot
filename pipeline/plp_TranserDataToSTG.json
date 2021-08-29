@@ -15,9 +15,16 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "TR-1-1-Lookup-The Data Has Changed",
+							"name": "TR-1-2-Get lastest transfer and current executionLogId",
 							"type": "Lookup",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "TR-1-1- Set variable configId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -30,7 +37,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nEXEC [dbo].[CheckDataIsChanged] @{item()}, @startExecutionId OUTPUT, @endExecutionId OUTPUT\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId ",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @dataFileType varchar(2);\nDECLARE @odsTableName varchar(30);\nDECLARE @tableType varchar(30) ;\nDECLARE @transferStoreProcedureName varchar(50) ;\n \nEXEC [dbo].[CheckDataIsChanged] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT,\n@dataFileType  OUTPUT, \n@odsTableName OUTPUT,\n@tableType OUTPUT,\n@transferStoreProcedureName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , \n@endExecutionId  AS endExecutionId,\n@dataFileType AS dataFileType, \n@odsTableName AS odsTableName,\n@tableType  AS tableType  ,\n@transferStoreProcedureName AS transferStoreProcedureName",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -48,11 +55,41 @@
 							}
 						},
 						{
-							"name": "TR-1-2-IF- Data has changed",
+							"name": "TR-1-3-IF- Data has changed",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "TR-1-1-Lookup-The Data Has Changed",
+									"activity": "TR-1-2-1- Set variable startExecutionId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-3- Set variable dataFileType",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-4- Set variable odsTableName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-2- Set variable endExecutionId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-5- Set variable tableType",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-6- Set variable transferStoreProcedureName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -61,12 +98,12 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(activity('TR-1-1-Lookup-The Data Has Changed').output.value[0].endExecutionId , activity('TR-1-1-Lookup-The Data Has Changed').output.value[0].startExecutionId)",
+									"value": "@greater(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].endExecutionId , activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].startExecutionId)\n",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
 									{
-										"name": "TR-1-2-1- Exit by no data has changed",
+										"name": "TR-1-3-1- Exit by no data has changed",
 										"type": "Wait",
 										"dependsOn": [],
 										"userProperties": [],
@@ -77,18 +114,400 @@
 								],
 								"ifTrueActivities": [
 									{
-										"name": "TR-1-2-1- Start transfer data to STG",
-										"type": "Wait",
+										"name": "TR-1-3-1-Copy data from ODS to STG",
+										"type": "Copy",
 										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
-											"waitTimeInSeconds": 1
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderStoredProcedureName": "[ods].[usp_transer_process_wrapper]",
+												"storedProcedureParameters": {
+													"configId": {
+														"type": "Int32",
+														"value": {
+															"value": "@variables('configId')",
+															"type": "Expression"
+														}
+													},
+													"dataFileType": {
+														"type": "String",
+														"value": {
+															"value": "@variables('dataFileType')",
+															"type": "Expression"
+														}
+													},
+													"endExecutionId": {
+														"type": "Int32",
+														"value": {
+															"value": "@variables('endExcutionId')",
+															"type": "Expression"
+														}
+													},
+													"odsTableName": {
+														"type": "String",
+														"value": {
+															"value": "@variables('odsTableName')",
+															"type": "Expression"
+														}
+													},
+													"startExecutionId": {
+														"type": "Int32",
+														"value": {
+															"value": "@variables('startExecutionId')",
+															"type": "Expression"
+														}
+													}
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"sink": {
+												"type": "AzureSqlSink",
+												"sqlWriterStoredProcedureName": {
+													"value": "@variables('transferStoreProcedureName')",
+													"type": "Expression"
+												},
+												"sqlWriterTableType": {
+													"value": "@variables('tableType')",
+													"type": "Expression"
+												},
+												"storedProcedureTableTypeParameterName": "source",
+												"disableMetricsCollection": false
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_Pilot_SQL_Broad",
+												"type": "DatasetReference",
+												"parameters": {
+													"tableName": "Null",
+													"schema": "Null"
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_Pilot_SQL_STG_Broad",
+												"type": "DatasetReference"
+											}
+										]
+									},
+									{
+										"name": "TR-1-3-2-Update status transfer to successful",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "TR-1-3-1-Copy data from ODS to STG",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[ods].[ctl_transfer_process_log]",
+											"storedProcedureParameters": {
+												"configId": {
+													"value": {
+														"value": "@variables('configId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"endExecutionId": {
+													"value": {
+														"value": "@variables('endExcutionId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"runId": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"startExecutionId": {
+													"value": {
+														"value": "@variables('startExecutionId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"tableName": {
+													"value": {
+														"value": "@variables('odsTableName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "TR-1-3-3-Pipeline to control error",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "TR-1-3-1-Copy data from ODS to STG",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "plp_Control_Pipeline_Fail",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"PipelineName": {
+													"value": "@pipeline().Pipeline",
+													"type": "Expression"
+												},
+												"DataFactoryName": {
+													"value": "@pipeline().DataFactory",
+													"type": "Expression"
+												},
+												"ErrorMessage": {
+													"value": "@activity('TR-1-3-1-Copy data from ODS to STG').output.errors[0].Message",
+													"type": "Expression"
+												},
+												"RunID": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"TriggerName": {
+													"value": "@pipeline().TriggerName",
+													"type": "Expression"
+												},
+												"TriggerTime": {
+													"value": "@pipeline().TriggerTime",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									{
+										"name": "TR-1-3-4- Set variable isTransferError to True",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-3-1-Copy data from ODS to STG",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isTransferError",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
 										}
 									}
 								]
 							}
+						},
+						{
+							"name": "TR-1-1- Set variable configId",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "configId",
+								"value": {
+									"value": "@item()",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-1- Set variable startExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "startExecutionId",
+								"value": {
+									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].startExecutionId)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-2- Set variable endExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "endExcutionId",
+								"value": {
+									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].endExecutionId)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-3- Set variable dataFileType",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "dataFileType",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].dataFileType",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-4- Set variable odsTableName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "odsTableName",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].odsTableName",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-5- Set variable tableType",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableType",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].tableType",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-6- Set variable transferStoreProcedureName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "transferStoreProcedureName",
+								"value": {
+									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].transferStoreProcedureName",
+									"type": "Expression"
+								}
+							}
 						}
 					]
+				}
+			},
+			{
+				"name": "TR-2-2- No error in transfer",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TR-1-ForEach-ListConfigId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			},
+			{
+				"name": "TR-2-1- Got error in transfer",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TR-1-ForEach-ListConfigId",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
 				}
 			}
 		],
@@ -108,6 +527,22 @@
 				"type": "String"
 			},
 			"endExcutionId": {
+				"type": "String"
+			},
+			"isTransferError": {
+				"type": "Boolean",
+				"defaultValue": false
+			},
+			"dataFileType": {
+				"type": "String"
+			},
+			"odsTableName": {
+				"type": "String"
+			},
+			"tableType": {
+				"type": "String"
+			},
+			"transferStoreProcedureName": {
 				"type": "String"
 			}
 		},
