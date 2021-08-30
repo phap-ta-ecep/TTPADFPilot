@@ -38,7 +38,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\n\nEXEC [dbo].[usp_get_Infor_ExecutionLogId_Broad] @{variables('configId')}, @startExecutionId OUTPUT @endExecutionId OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId\n",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\n\nEXEC [dbo].[usp_get_Infor_ExecutionLogId_Broad] @{variables('configId')}, @startExecutionId OUTPUT @endExecutionId OUTPUT, @odsTableName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -67,6 +67,12 @@
 								},
 								{
 									"activity": "TR-1-2-2- Set variable endExecutionId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-3- Set variable ODSTableName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -182,7 +188,7 @@
 													"type": "Expression"
 												},
 												"ErrorMessage": {
-													"value": "@activity('TR-1-3-1-Copy data from ODS to STG').output.errors[0].Message",
+													"value": "@activity('TR-1-3-1-Transfer data from ODS to STG').output.errors[0].Message",
 													"type": "Expression"
 												},
 												"RunID": {
@@ -318,6 +324,26 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "TR-1-2-3- Set variable ODSTableName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "odsTableName",
+								"value": {
+									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].odsTableName)",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -377,16 +403,7 @@
 				"type": "Boolean",
 				"defaultValue": false
 			},
-			"dataFileType": {
-				"type": "String"
-			},
 			"odsTableName": {
-				"type": "String"
-			},
-			"tableType": {
-				"type": "String"
-			},
-			"transferStoreProcedureName": {
 				"type": "String"
 			}
 		},
