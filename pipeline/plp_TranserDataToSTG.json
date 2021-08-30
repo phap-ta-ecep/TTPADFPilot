@@ -38,7 +38,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\n\nEXEC [dbo].[usp_get_Infor_ExecutionLogId_Broad] @{variables('configId')}, @startExecutionId OUTPUT @endExecutionId OUTPUT, @odsTableName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName\n",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\n\nEXEC [dbo].[usp_get_Infor_ExecutionLogId_Broad] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @odsTableName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
