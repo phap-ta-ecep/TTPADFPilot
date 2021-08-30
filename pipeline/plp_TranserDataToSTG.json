@@ -250,14 +250,14 @@
 												},
 												"endExecutionId": {
 													"value": {
-														"value": "@variables('startExecutionId')",
+														"value": "@variables('endExcutionId')",
 														"type": "Expression"
 													},
 													"type": "Int32"
 												},
 												"startExecutionId": {
 													"value": {
-														"value": "@variables('endExcutionId')",
+														"value": "@variables('startExecutionId')",
 														"type": "Expression"
 													},
 													"type": "Int32"
