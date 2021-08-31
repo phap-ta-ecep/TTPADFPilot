@@ -61,7 +61,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "plp_TranserDataToSTG",
+						"referenceName": "plp_MergeODSToSTG",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
