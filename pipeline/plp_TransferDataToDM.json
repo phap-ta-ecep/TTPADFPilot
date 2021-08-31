@@ -512,7 +512,7 @@
 			}
 		],
 		"parameters": {
-			"listConfigId_Ar": {
+			"listProcessConfigId_Ar": {
 				"type": "array",
 				"defaultValue": [
 					"1"
