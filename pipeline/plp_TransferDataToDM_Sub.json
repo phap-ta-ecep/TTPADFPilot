@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete\nfrom control.process a\ninner join control.process_concurrent_trans b on a.process_id = b.process_id\nwhere a.process_config_id = @{pipeline().parameters.processConfigId} and a.process_status ='PS';",
+							"value": "SELECT a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete,\nREPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+'Type' as table_type,\n'[stg].[usp_transfer_Board_' + REPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+']' as transfer_sp\nFROM [control].[process] a\nINNER JOIN [control].[process_concurrent_trans] b ON a.process_id = b.process_id\nWHERE a.process_config_id = @{pipeline().parameters.processConfigId} AND a.process_status ='PS';",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -94,7 +94,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-5- Set variable isComplete",
+							"name": "TR-1-2-3- Set variable isComplete",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -129,7 +129,25 @@
 									]
 								},
 								{
-									"activity": "TR-1-2-5- Set variable isComplete",
+									"activity": "TR-1-2-3- Set variable isComplete",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-5- Set variable tableType",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-6- Set variable processId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-5- Set variable transferSP",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -201,6 +219,15 @@
 											},
 											"sink": {
 												"type": "SqlServerSink",
+												"sqlWriterStoredProcedureName": {
+													"value": "@variables('transferStoreProcedureName')",
+													"type": "Expression"
+												},
+												"sqlWriterTableType": {
+													"value": "@variables('tableType')",
+													"type": "Expression"
+												},
+												"storedProcedureTableTypeParameterName": "source",
 												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
@@ -367,7 +394,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-5- Set variable processId",
+							"name": "TR-1-2-6- Set variable processId",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -375,6 +402,32 @@
 								"variableName": "processId",
 								"value": {
 									"value": "@item().process_id",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-5- Set variable tableType",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableType",
+								"value": {
+									"value": "@item().table_type",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-5- Set variable transferSP",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableType",
+								"value": {
+									"value": "@item().table_type",
 									"type": "Expression"
 								}
 							}
@@ -413,6 +466,9 @@
 				"type": "String"
 			},
 			"isComplete": {
+				"type": "String"
+			},
+			"tableType": {
 				"type": "String"
 			}
 		},
