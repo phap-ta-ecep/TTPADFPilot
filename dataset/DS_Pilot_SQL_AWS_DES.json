@@ -1,0 +1,18 @@
+{
+	"name": "DS_Pilot_SQL_AWS_DES",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AWS_SqlServer",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"dbName": "rdsadmin"
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}

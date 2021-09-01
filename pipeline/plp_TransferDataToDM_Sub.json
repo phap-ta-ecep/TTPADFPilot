@@ -1,71 +1,117 @@
 {
-	"name": "plp_TransferDataToDM",
+	"name": "plp_TransferDataToDM_Sub",
 	"properties": {
 		"activities": [
 			{
-				"name": "TR-1-ForEach-List process config id",
-				"type": "ForEach",
+				"name": "TR-1-2-Get process concurrent trans infor",
+				"type": "Lookup",
 				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete\nfrom control.process a\ninner join control.process_concurrent_trans b on a.process_id = b.process_id\nwhere a.process_config_id = @{pipeline().parameters.processConfigId} and a.process_status ='PS';",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_Pilot_SQL_Broad",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "Null",
+							"schema": "Null"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "TR-1-2-Get process concurrent trans infor",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@pipeline().parameters.listProcessConfigId_Ar",
+						"value": "@activity('TR-1-2-Get process concurrent trans infor').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "TR-1-2-Get process concurrent trans infor",
-							"type": "Lookup",
-							"dependsOn": [
-								{
-									"activity": "TR-1-1- Set variable processConfigId",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
+							"name": "TR-1-2-1- Set variable startExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "select a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete\nfrom control.process a\ninner join control.process_concurrent_trans b on a.process_id = b.process_id\nwhere a.process_config_id = @{variables('configId')} and a.process_status ='PS';",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "DS_Pilot_SQL_Broad",
-									"type": "DatasetReference",
-									"parameters": {
-										"tableName": "Null",
-										"schema": "Null"
-									}
-								},
-								"firstRowOnly": false
+								"variableName": "startExecutionId",
+								"value": {
+									"value": "@item().start_execution_id",
+									"type": "Expression"
+								}
 							}
 						},
 						{
-							"name": "TR-1-3-IF- Data has changed",
+							"name": "TR-1-2-2- Set variable endExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "endExcutionId",
+								"value": {
+									"value": "@item().end_execution_id",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-4- Set variable concurrentTransName_copy1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "concurrentTransName",
+								"value": {
+									"value": "@item().concurrent_trans_name",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2-5- Set variable isComplete",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "isComplete",
+								"value": {
+									"value": "@item().is_complete",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-3-IF- Data has changed_copy1",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
 									"activity": "TR-1-2-1- Set variable startExecutionId",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "TR-1-2-4- Set variable concurrentTransName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -77,7 +123,13 @@
 									]
 								},
 								{
-									"activity": "TR-1-2-5- Set variable tableType",
+									"activity": "TR-1-2-4- Set variable concurrentTransName_copy1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-5- Set variable isComplete",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -86,23 +138,47 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].endExecutionId , activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].startExecutionId)\n",
+									"value": "@greater(variables('endExcutionId'), variables('startExecutionId'))",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
 									{
-										"name": "TR-1-3-1- Exit by no data has changed",
-										"type": "Wait",
+										"name": "Update is_complete to 1",
+										"type": "Lookup",
 										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
-											"waitTimeInSeconds": 1
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "update control.process_concurrent_trans \nset is_complete = 1, dt_lastchange = getdate()\nwhere process_id =@{variables('processId')} \nand concurrent_trans_name = @{variables('concurrentTransName')}",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "DS_Pilot_SQL_Broad",
+												"type": "DatasetReference",
+												"parameters": {
+													"tableName": "Null",
+													"schema": "Null"
+												}
+											},
+											"firstRowOnly": false
 										}
 									}
 								],
 								"ifTrueActivities": [
 									{
-										"name": "TR-1-3-1-Transfer data to Des DB",
+										"name": "Transfer data to Des DB",
 										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
@@ -116,43 +192,9 @@
 										"typeProperties": {
 											"source": {
 												"type": "AzureSqlSource",
-												"sqlReaderStoredProcedureName": "[ods].[usp_transer_process_wrapper]",
-												"storedProcedureParameters": {
-													"configId": {
-														"type": "Int32",
-														"value": {
-															"value": "@variables('configId')",
-															"type": "Expression"
-														}
-													},
-													"dataFileType": {
-														"type": "String",
-														"value": {
-															"value": "@variables('dataFileType')",
-															"type": "Expression"
-														}
-													},
-													"endExecutionId": {
-														"type": "Int32",
-														"value": {
-															"value": "@variables('endExcutionId')",
-															"type": "Expression"
-														}
-													},
-													"odsTableName": {
-														"type": "String",
-														"value": {
-															"value": "@variables('odsTableName')",
-															"type": "Expression"
-														}
-													},
-													"startExecutionId": {
-														"type": "Int32",
-														"value": {
-															"value": "@variables('startExecutionId')",
-															"type": "Expression"
-														}
-													}
+												"sqlReaderQuery": {
+													"value": "select * from @{variables('concurrentTransName')}\nwhere ODSLastUpdateExecutionId > @{variables('startExecutionId')} \nand ODSLastUpdateExecutionId <= @{variables('endExcutionId')}\n;",
+													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
 												"partitionOption": "None"
@@ -198,11 +240,11 @@
 										]
 									},
 									{
-										"name": "TR-1-3-2-Update status transfer to successful",
+										"name": "TR-1-3-2-Update status transfer to successful_copy1",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "TR-1-3-1-Transfer data to Des DB",
+												"activity": "Transfer data to Des DB",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -262,11 +304,11 @@
 										}
 									},
 									{
-										"name": "TR-1-3-3-Pipeline to control error",
+										"name": "TR-1-3-3-Pipeline to control error_copy1",
 										"type": "ExecutePipeline",
 										"dependsOn": [
 											{
-												"activity": "TR-1-3-1-Transfer data to Des DB",
+												"activity": "Transfer data to Des DB",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -308,11 +350,11 @@
 										}
 									},
 									{
-										"name": "TR-1-3-4- Set variable isTransferError to True",
+										"name": "TR-1-3-4- Set variable isTransferError to True_copy1",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "TR-1-3-1-Transfer data to Des DB",
+												"activity": "Transfer data to Des DB",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -331,140 +373,26 @@
 							}
 						},
 						{
-							"name": "TR-1-1- Set variable processConfigId",
+							"name": "TR-1-2-5- Set variable processId",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "configId",
+								"variableName": "processId",
 								"value": {
-									"value": "@item()",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "TR-1-2-1- Set variable startExecutionId",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "TR-1-2-Get process concurrent trans infor",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "startExecutionId",
-								"value": {
-									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].startExecutionId)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "TR-1-2-2- Set variable endExecutionId",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "TR-1-2-Get process concurrent trans infor",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "endExcutionId",
-								"value": {
-									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].endExecutionId)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "TR-1-2-4- Set variable concurrentTransName",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "TR-1-2-Get process concurrent trans infor",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "concurrentTransName",
-								"value": {
-									"value": "@item().concurrent_trans_name",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "TR-1-2-5- Set variable tableType",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "TR-1-2-Get process concurrent trans infor",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "tableType",
-								"value": {
-									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].tableType",
+									"value": "@item().process_id",
 									"type": "Expression"
 								}
 							}
 						}
 					]
 				}
-			},
-			{
-				"name": "TR-2-2- No error in transfer",
-				"type": "Wait",
-				"dependsOn": [
-					{
-						"activity": "TR-1-ForEach-List process config id",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"waitTimeInSeconds": 1
-				}
-			},
-			{
-				"name": "TR-2-1- Got error in transfer",
-				"type": "Wait",
-				"dependsOn": [
-					{
-						"activity": "TR-1-ForEach-List process config id",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"waitTimeInSeconds": 1
-				}
 			}
 		],
 		"parameters": {
-			"listProcessConfigId_Ar": {
-				"type": "array",
-				"defaultValue": [
-					"1"
-				]
+			"processConfigId": {
+				"type": "int",
+				"defaultValue": 1
 			}
 		},
 		"variables": {
@@ -490,7 +418,7 @@
 			"concurrentTransName": {
 				"type": "String"
 			},
-			"is_complete": {
+			"isComplete": {
 				"type": "String"
 			}
 		},
