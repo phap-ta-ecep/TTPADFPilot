@@ -200,16 +200,7 @@
 												"partitionOption": "None"
 											},
 											"sink": {
-												"type": "AzureSqlSink",
-												"sqlWriterStoredProcedureName": {
-													"value": "@variables('transferStoreProcedureName')",
-													"type": "Expression"
-												},
-												"sqlWriterTableType": {
-													"value": "@variables('tableType')",
-													"type": "Expression"
-												},
-												"storedProcedureTableTypeParameterName": "source",
+												"type": "SqlServerSink",
 												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
@@ -234,8 +225,11 @@
 										],
 										"outputs": [
 											{
-												"referenceName": "DS_Pilot_SQL_STG_Broad",
-												"type": "DatasetReference"
+												"referenceName": "DS_Pilot_SQL_AWS_DES",
+												"type": "DatasetReference",
+												"parameters": {
+													"dbName": "pilotDesDB"
+												}
 											}
 										]
 									},
