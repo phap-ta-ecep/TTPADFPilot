@@ -3,23 +3,23 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "TR-1-ForEach-List Transfer Process",
+				"name": "TR-1-ForEach-List process config id",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@pipeline().parameters.listConfigId_Ar",
+						"value": "@pipeline().parameters.listProcessConfigId_Ar",
 						"type": "Expression"
 					},
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "TR-1-2-Get lastest transfer and current executionLogId",
+							"name": "TR-1-2-Get process concurrent trans infor",
 							"type": "Lookup",
 							"dependsOn": [
 								{
-									"activity": "TR-1-1- Set variable configId",
+									"activity": "TR-1-1- Set variable processConfigId",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -65,13 +65,7 @@
 									]
 								},
 								{
-									"activity": "TR-1-2-3- Set variable dataFileType",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "TR-1-2-4- Set variable odsTableName",
+									"activity": "TR-1-2-4- Set variable viewName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -84,12 +78,6 @@
 								},
 								{
 									"activity": "TR-1-2-5- Set variable tableType",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "TR-1-2-6- Set variable transferStoreProcedureName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -114,7 +102,7 @@
 								],
 								"ifTrueActivities": [
 									{
-										"name": "TR-1-3-1-Copy data from ODS to STG",
+										"name": "TR-1-3-1-Transfer data to Des DB",
 										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
@@ -214,7 +202,7 @@
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "TR-1-3-1-Copy data from ODS to STG",
+												"activity": "TR-1-3-1-Transfer data to Des DB",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -278,7 +266,7 @@
 										"type": "ExecutePipeline",
 										"dependsOn": [
 											{
-												"activity": "TR-1-3-1-Copy data from ODS to STG",
+												"activity": "TR-1-3-1-Transfer data to Des DB",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -324,7 +312,7 @@
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "TR-1-3-1-Copy data from ODS to STG",
+												"activity": "TR-1-3-1-Transfer data to Des DB",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -343,7 +331,7 @@
 							}
 						},
 						{
-							"name": "TR-1-1- Set variable configId",
+							"name": "TR-1-1- Set variable processConfigId",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -360,7 +348,7 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"activity": "TR-1-2-Get process concurrent trans infor",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -380,7 +368,7 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"activity": "TR-1-2-Get process concurrent trans infor",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -396,31 +384,11 @@
 							}
 						},
 						{
-							"name": "TR-1-2-3- Set variable dataFileType",
+							"name": "TR-1-2-4- Set variable viewName",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "dataFileType",
-								"value": {
-									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].dataFileType",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "TR-1-2-4- Set variable odsTableName",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"activity": "TR-1-2-Get process concurrent trans infor",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -440,7 +408,7 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"activity": "TR-1-2-Get process concurrent trans infor",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -454,26 +422,6 @@
 									"type": "Expression"
 								}
 							}
-						},
-						{
-							"name": "TR-1-2-6- Set variable transferStoreProcedureName",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "transferStoreProcedureName",
-								"value": {
-									"value": "@activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].transferStoreProcedureName",
-									"type": "Expression"
-								}
-							}
 						}
 					]
 				}
@@ -483,7 +431,7 @@
 				"type": "Wait",
 				"dependsOn": [
 					{
-						"activity": "TR-1-ForEach-List Transfer Process",
+						"activity": "TR-1-ForEach-List process config id",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -499,7 +447,7 @@
 				"type": "Wait",
 				"dependsOn": [
 					{
-						"activity": "TR-1-ForEach-List Transfer Process",
+						"activity": "TR-1-ForEach-List process config id",
 						"dependencyConditions": [
 							"Failed"
 						]
