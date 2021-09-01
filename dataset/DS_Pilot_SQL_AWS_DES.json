@@ -5,7 +5,15 @@
 			"referenceName": "LS_AWS_SqlServer",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"dbName": "rdsadmin"
+				"dbName": {
+					"value": "@dataset().dbName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"dbName": {
+				"type": "string"
 			}
 		},
 		"folder": {
