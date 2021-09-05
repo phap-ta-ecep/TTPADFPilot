@@ -410,8 +410,8 @@
 				}
 			},
 			{
-				"name": "TR-3-Successfull",
-				"type": "Wait",
+				"name": "TR-3-Update process status SU",
+				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
 						"activity": "TR-2-ForEach-lookup results",
@@ -420,14 +420,60 @@
 						]
 					}
 				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"waitTimeInSeconds": 1
+					"storedProcedureName": "[ods].[ctl_update_Process_Status]",
+					"storedProcedureParameters": {
+						"concurrentTransName": {
+							"value": {
+								"value": "@variables('concurrentTransName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"isComplete": {
+							"value": null,
+							"type": "Int32"
+						},
+						"pipelineRunId": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"processId": {
+							"value": {
+								"value": "@variables('processId')",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"processStatus": {
+							"value": "SU",
+							"type": "String"
+						},
+						"updateType": {
+							"value": "2",
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "TR-4-Error",
-				"type": "Wait",
+				"name": "TR-4-Update process status PF",
+				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
 						"activity": "TR-2-ForEach-lookup results",
@@ -436,9 +482,55 @@
 						]
 					}
 				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"waitTimeInSeconds": 1
+					"storedProcedureName": "[ods].[ctl_update_Process_Status]",
+					"storedProcedureParameters": {
+						"concurrentTransName": {
+							"value": {
+								"value": "@variables('concurrentTransName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"isComplete": {
+							"value": null,
+							"type": "Int32"
+						},
+						"pipelineRunId": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"processId": {
+							"value": {
+								"value": "@variables('processId')",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"processStatus": {
+							"value": "PF",
+							"type": "String"
+						},
+						"updateType": {
+							"value": "2",
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
