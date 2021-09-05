@@ -923,11 +923,11 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Execute Pipeline To Send Notification",
+							"name": "ETL-1-1-7-2 Execute Pipeline To Send Notification",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Refresh  status file to ER_crd_greater_0",
+									"activity": "ETL-1-1-7-1 Refresh  status file to ER_crd_greater_0",
 									"dependencyConditions": [
 										"Completed"
 									]
@@ -966,7 +966,7 @@
 							}
 						},
 						{
-							"name": "Refresh  status file to ER_crd_greater_0",
+							"name": "ETL-1-1-7-1 Refresh  status file to ER_crd_greater_0",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -978,7 +978,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
