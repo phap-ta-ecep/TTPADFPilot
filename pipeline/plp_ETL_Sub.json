@@ -836,7 +836,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[TruncateTempTable]",
+					"storedProcedureName": "[ods].[ctl_truncate_Temp_Table]",
 					"storedProcedureParameters": {
 						"configId": {
 							"value": {
