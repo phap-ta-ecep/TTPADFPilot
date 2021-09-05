@@ -48,7 +48,7 @@
 				}
 			},
 			{
-				"name": "MP-3-Transfer data from ods to stg",
+				"name": "MP-3-Sync data from ODS to STG",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
