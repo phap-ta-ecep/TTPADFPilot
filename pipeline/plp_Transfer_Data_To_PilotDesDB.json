@@ -69,7 +69,7 @@
 							"typeProperties": {
 								"variableName": "startExecutionId",
 								"value": {
-									"value": "@item().start_execution_id",
+									"value": "@string(item().start_execution_id)",
 									"type": "Expression"
 								}
 							}
@@ -82,7 +82,7 @@
 							"typeProperties": {
 								"variableName": "endExcutionId",
 								"value": {
-									"value": "@item().end_execution_id",
+									"value": "@string(item().end_execution_id)",
 									"type": "Expression"
 								}
 							}
@@ -108,7 +108,7 @@
 							"typeProperties": {
 								"variableName": "isComplete",
 								"value": {
-									"value": "@item().is_complete",
+									"value": "@string(item().is_complete)",
 									"type": "Expression"
 								}
 							}
@@ -362,7 +362,7 @@
 							"typeProperties": {
 								"variableName": "processId",
 								"value": {
-									"value": "@item().process_id",
+									"value": "@string(item().process_id)",
 									"type": "Expression"
 								}
 							}
