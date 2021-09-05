@@ -163,7 +163,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(variables('endExcutionId'), variables('startExecutionId'))",
+									"value": "@greater(int(variables('endExcutionId')), int(variables('startExecutionId')))",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
