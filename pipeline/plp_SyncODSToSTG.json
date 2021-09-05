@@ -238,7 +238,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[stg].[usp_merge_ODS_To_STG_Board_Wrapper]",
+											"storedProcedureName": "[stg].[usp_merge_ODS_To_STG_Process_Wrapper]",
 											"storedProcedureParameters": {
 												"configId": {
 													"value": {
