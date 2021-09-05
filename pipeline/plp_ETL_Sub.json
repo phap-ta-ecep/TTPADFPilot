@@ -558,7 +558,8 @@
 				}
 			},
 			{
-				"name": "Check To Merge Data",
+				"name": "ETL-1-1-6 Check To Merge Data",
+				"description": "if [Datetime] > [Datetime] Lastest Extract => start merge data from temp table to ODS",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -587,7 +588,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Merge data from temp to ODS",
+							"name": "ETL-1-1-6-1 Merge data from temp to ODS",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -599,7 +600,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[ods].[usp_merge_process_wrapper]",
+								"storedProcedureName": "[ods].[ctl_merge_Broad_Process_Wrapper]",
 								"storedProcedureParameters": {
 									"configId": {
 										"value": {
@@ -627,7 +628,7 @@
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Merge data from temp to ODS",
+									"activity": "ETL-1-1-6-1 Merge data from temp to ODS",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -721,7 +722,7 @@
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Merge data from temp to ODS",
+									"activity": "ETL-1-1-6-1 Merge data from temp to ODS",
 									"dependencyConditions": [
 										"Failed"
 									]
@@ -1030,7 +1031,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Extract Files Completed",
+							"name": "ETL-1-1-5-1 Extract Files Completed",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
