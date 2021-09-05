@@ -572,12 +572,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(and( not(variables('isExtractFail')) , greater(activity('Check file_status ER').output.count, 0)),\nequals(activity('Check Current-Up-To With File DateTime').output.firstRow.Ncount, 0)\n)",
+						"value": "@and(and( not(variables('isExtractFail')) , greater(activity('ETL-1-1-1-Lookup file_status is ER').output.count, 0)),\nequals(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Exit by missing data or no ETL file",
+							"name": "ETL-1-1-6-6 Exit merge process",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -893,7 +893,8 @@
 				}
 			},
 			{
-				"name": "IF Count Of Current Date  Greater Than 0",
+				"name": "ETL-1-1-7 IF Count Of Current Date  Greater Than 0",
+				"description": "If startExecutionId < ",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -906,7 +907,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(activity('Check Current-Up-To With File DateTime').output.firstRow.Ncount, 0)\n\n",
+						"value": "@greater(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0)",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
