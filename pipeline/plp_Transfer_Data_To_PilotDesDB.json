@@ -237,7 +237,7 @@
 										]
 									},
 									{
-										"name": "TR-1-8-2-Update status transfer to successful_copy1",
+										"name": "TR-1-8-2-Update status sub-transfer to successful",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
