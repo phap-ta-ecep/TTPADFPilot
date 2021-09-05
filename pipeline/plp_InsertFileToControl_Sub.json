@@ -111,7 +111,7 @@
 										},
 										"type": "String"
 									},
-									"pipeline_run_id": {
+									"PipelineRunId": {
 										"value": {
 											"value": "@pipeline().RunId",
 											"type": "Expression"
