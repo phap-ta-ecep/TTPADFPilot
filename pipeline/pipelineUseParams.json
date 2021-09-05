@@ -240,6 +240,9 @@
 				"type": "string"
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [],
 		"lastPublishTime": "2021-08-11T14:09:46Z"
 	},

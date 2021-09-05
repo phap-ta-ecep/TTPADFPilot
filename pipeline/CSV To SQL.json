@@ -281,6 +281,9 @@
 				}
 			}
 		],
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [
 			"CSVToDB"
 		],

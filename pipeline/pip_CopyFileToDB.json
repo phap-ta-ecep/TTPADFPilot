@@ -117,6 +117,9 @@
 				"type": "string"
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": []
 	}
 }

@@ -16,6 +16,9 @@
 				}
 			}
 		],
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [],
 		"lastPublishTime": "2021-08-17T07:37:34Z"
 	},

@@ -56,6 +56,9 @@
 				"defaultValue": "ImpactAreaType"
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": []
 	}
 }

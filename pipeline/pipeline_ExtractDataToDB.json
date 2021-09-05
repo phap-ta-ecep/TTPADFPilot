@@ -105,6 +105,9 @@
 				]
 			}
 		],
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [],
 		"lastPublishTime": "2021-08-09T04:16:44Z"
 	},
