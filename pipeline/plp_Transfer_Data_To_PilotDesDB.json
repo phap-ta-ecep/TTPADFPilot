@@ -55,7 +55,7 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "TR-1-2-1- Set variable startExecutionId",
+							"name": "TR-1-1- Set variable startExecutionId",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -68,7 +68,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-2- Set variable endExecutionId",
+							"name": "TR-1-2- Set variable endExecutionId",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -81,7 +81,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-4- Set variable concurrentTransName_copy1",
+							"name": "TR-1-4- Set variable concurrentTransName_copy1",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -94,7 +94,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-3- Set variable isComplete",
+							"name": "TR-1-3- Set variable isComplete",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -107,47 +107,47 @@
 							}
 						},
 						{
-							"name": "TR-1-3-IF- Data has changed_copy1",
+							"name": "TR-1-8-IF- Data has changed",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "TR-1-2-1- Set variable startExecutionId",
+									"activity": "TR-1-1- Set variable startExecutionId",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "TR-1-2-2- Set variable endExecutionId",
+									"activity": "TR-1-2- Set variable endExecutionId",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "TR-1-2-4- Set variable concurrentTransName_copy1",
+									"activity": "TR-1-4- Set variable concurrentTransName_copy1",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "TR-1-2-3- Set variable isComplete",
+									"activity": "TR-1-3- Set variable isComplete",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "TR-1-2-5- Set variable tableType",
+									"activity": "TR-1-5- Set variable tableType",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "TR-1-2-6- Set variable processId",
+									"activity": "TR-1-6- Set variable processId",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "TR-1-2-5- Set variable transferSP",
+									"activity": "TR-1-7- Set variable transferSP",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -161,42 +161,18 @@
 								},
 								"ifFalseActivities": [
 									{
-										"name": "Update is_complete to 1",
-										"type": "Lookup",
+										"name": "TR-1-8-1-Update isComplete-to-1",
+										"type": "Wait",
 										"dependsOn": [],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
 										"userProperties": [],
 										"typeProperties": {
-											"source": {
-												"type": "AzureSqlSource",
-												"sqlReaderQuery": {
-													"value": "update control.process_concurrent_trans \nset is_complete = 1, dt_lastchange = getdate()\nwhere process_id =@{variables('processId')} \nand concurrent_trans_name = @{variables('concurrentTransName')}",
-													"type": "Expression"
-												},
-												"queryTimeout": "02:00:00",
-												"partitionOption": "None"
-											},
-											"dataset": {
-												"referenceName": "DS_Pilot_SQL_Broad",
-												"type": "DatasetReference",
-												"parameters": {
-													"tableName": "Null",
-													"schema": "Null"
-												}
-											},
-											"firstRowOnly": false
+											"waitTimeInSeconds": 1
 										}
 									}
 								],
 								"ifTrueActivities": [
 									{
-										"name": "Transfer data to Des DB",
+										"name": "TR-1-8-1-Transfer data to Des DB",
 										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
@@ -220,7 +196,7 @@
 											"sink": {
 												"type": "SqlServerSink",
 												"sqlWriterStoredProcedureName": {
-													"value": "@variables('transferStoreProcedureName')",
+													"value": "@variables('transferSPName')",
 													"type": "Expression"
 												},
 												"sqlWriterTableType": {
@@ -261,11 +237,11 @@
 										]
 									},
 									{
-										"name": "TR-1-3-2-Update status transfer to successful_copy1",
+										"name": "TR-1-8-2-Update status transfer to successful_copy1",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "Transfer data to Des DB",
+												"activity": "TR-1-8-1-Transfer data to Des DB",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -325,11 +301,11 @@
 										}
 									},
 									{
-										"name": "TR-1-3-3-Pipeline to control error_copy1",
+										"name": "TR-1-8-3-Pipeline to control error_copy1",
 										"type": "ExecutePipeline",
 										"dependsOn": [
 											{
-												"activity": "Transfer data to Des DB",
+												"activity": "TR-1-8-1-Transfer data to Des DB",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -352,7 +328,7 @@
 													"type": "Expression"
 												},
 												"ErrorMessage": {
-													"value": "@activity('TR-1-3-1-Copy data from ODS to STG').output.errors[0].Message",
+													"value": "@activity('TR-1-8-1-Transfer data to Des DB').output.errors[0].Message",
 													"type": "Expression"
 												},
 												"RunID": {
@@ -371,11 +347,11 @@
 										}
 									},
 									{
-										"name": "TR-1-3-4- Set variable isTransferError to True_copy1",
+										"name": "TR-1-8-4- Set variable isTransferError to True_copy1",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "Transfer data to Des DB",
+												"activity": "TR-1-8-1-Transfer data to Des DB",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -394,7 +370,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-6- Set variable processId",
+							"name": "TR-1-6- Set variable processId",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -407,7 +383,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-5- Set variable tableType",
+							"name": "TR-1-5- Set variable tableType",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -420,7 +396,7 @@
 							}
 						},
 						{
-							"name": "TR-1-2-5- Set variable transferSP",
+							"name": "TR-1-7- Set variable transferSP",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
