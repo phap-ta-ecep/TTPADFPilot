@@ -63,7 +63,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Filter Files').output.Value",
+						"value": "@activity('IS-2-1-2-Filter Files').output.Value",
 						"type": "Expression"
 					},
 					"isSequential": true,
@@ -142,7 +142,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get Metadata1').output.childitems",
+						"value": "@activity('IS-2-1-1-Get Metadata').output.childitems",
 						"type": "Expression"
 					},
 					"condition": {
