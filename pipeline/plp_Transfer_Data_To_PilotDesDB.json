@@ -5,7 +5,14 @@
 			{
 				"name": "TR-1-Get transfer process information",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "TR-1 Insert process",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -18,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete,\nREPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+'Type' as table_type,\n'[stg].[usp_transfer_Board_' + REPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+']' as transfer_sp\nFROM [control].[process] a\nINNER JOIN [control].[process_concurrent_trans] b ON a.process_id = b.process_id\nWHERE a.process_config_id = @{pipeline().parameters.processConfigId} AND a.process_status ='PS';",
+							"value": "SELECT a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete,\nREPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+'Type' as table_type,\n'[stg].[usp_transfer_Board_' + REPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+']' as transfer_sp\nFROM [control].[process] a\nINNER JOIN [control].[process_concurrent_trans] b ON a.process_id = b.process_id\nWHERE a.process_config_id = @{pipeline().parameters.processConfigId} AND a.process_status ='PR';",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -443,6 +450,35 @@
 						"updateType": {
 							"value": "2",
 							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "TR-1 Insert process",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[stg].[usp_transfer_Board_To_PilotDesDB]",
+					"storedProcedureParameters": {
+						"pipeline_run_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
 						}
 					}
 				},
