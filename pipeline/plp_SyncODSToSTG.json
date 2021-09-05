@@ -115,7 +115,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[ods].[ctl_transfer_process_log]",
+											"storedProcedureName": "[ods].[ctl_etl_process_log]",
 											"storedProcedureParameters": {
 												"configId": {
 													"value": {
