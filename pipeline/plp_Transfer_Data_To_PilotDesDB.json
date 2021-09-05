@@ -1,9 +1,9 @@
 {
-	"name": "plp_TransferDataToDM_Sub",
+	"name": "plp_Transfer_Data_To_PilotDesDB",
 	"properties": {
 		"activities": [
 			{
-				"name": "TR-1-2-Get process concurrent trans infor",
+				"name": "TR-1-Get transfer process information",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -36,11 +36,11 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "TR-2-ForEach-lookup results",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "TR-1-2-Get process concurrent trans infor",
+						"activity": "TR-1-Get transfer process information",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -49,7 +49,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('TR-1-2-Get process concurrent trans infor').output.value",
+						"value": "@activity('TR-1-Get transfer process information').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
@@ -425,14 +425,46 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "tableType",
+								"variableName": "transferSPName",
 								"value": {
-									"value": "@item().table_type",
+									"value": "@item().transfer_sp",
 									"type": "Expression"
 								}
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "TR-3-Successfull",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TR-2-ForEach-lookup results",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			},
+			{
+				"name": "TR-4-Error",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TR-2-ForEach-lookup results",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
 				}
 			}
 		],
@@ -443,9 +475,6 @@
 			}
 		},
 		"variables": {
-			"configId": {
-				"type": "String"
-			},
 			"startExecutionId": {
 				"type": "String"
 			},
@@ -456,7 +485,7 @@
 				"type": "Boolean",
 				"defaultValue": false
 			},
-			"transferStoreProcedureName": {
+			"transferSPName": {
 				"type": "String"
 			},
 			"processId": {
