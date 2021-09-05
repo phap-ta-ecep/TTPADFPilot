@@ -243,7 +243,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[dbo].[UpdateDataFileGuid]",
+											"storedProcedureName": "[ods].[ctl_update_Data_File_Id]",
 											"storedProcedureParameters": {
 												"fileName": {
 													"value": {
@@ -286,7 +286,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 											"storedProcedureParameters": {
 												"fileName": {
 													"value": {
@@ -444,7 +444,7 @@
 										"typeProperties": {
 											"variableName": "errorMessage",
 											"value": {
-												"value": "@activity('Copy file to DB').Error.Message",
+												"value": "@activity('ETL-1-1-3-8-1 Copy file to temp table').Error.Message",
 												"type": "Expression"
 											}
 										}
