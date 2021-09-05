@@ -853,6 +853,7 @@
 			},
 			{
 				"name": "ETL-1-1-4-Check current up to date",
+				"description": "",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -874,7 +875,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "DECLARE @Ncount INT;\nEXEC dbo.CheckDataCurrentUpToDate  @{pipeline().parameters.configId}, @Ncount OUTPUT;\nSELECT @Ncount AS Ncount;",
+							"value": "DECLARE @Ncount INT;\nEXEC [ods].[ctl_check_Data_Current_Up_To_Date]  @{pipeline().parameters.configId}, @Ncount OUTPUT;\nSELECT @Ncount AS Ncount;",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -1011,7 +1012,7 @@
 				}
 			},
 			{
-				"name": "Extract Fail",
+				"name": "ETL-1-1-5 Extract Fail",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -1040,7 +1041,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Refresh  status file to ER",
+							"name": "ETL-1-1-5-1 Refresh  status file to ER",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -1052,7 +1053,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
@@ -1085,11 +1086,11 @@
 							}
 						},
 						{
-							"name": "Write log and send mail - extract fail",
+							"name": "ETL-1-1-5-2-Write log and send mail - extract fail",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Refresh  status file to ER",
+									"activity": "ETL-1-1-5-1 Refresh  status file to ER",
 									"dependencyConditions": [
 										"Completed"
 									]
