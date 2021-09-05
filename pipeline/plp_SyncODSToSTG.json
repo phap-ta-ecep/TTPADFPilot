@@ -413,7 +413,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "TR-2-2-1-Lastest Update Guid On STG",
+							"name": "TR-2-2-1-Lastest Update STG Guid",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
