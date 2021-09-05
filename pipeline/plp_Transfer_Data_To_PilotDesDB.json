@@ -7,7 +7,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "TR-1 Insert process",
+						"activity": "TR-0 Insert process",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -459,7 +459,7 @@
 				}
 			},
 			{
-				"name": "TR-1 Insert process",
+				"name": "TR-0 Insert process",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [],
 				"policy": {
