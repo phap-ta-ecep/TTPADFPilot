@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ET-1-ForEach list config id",
+				"name": "ETL-1-ForEach list config id",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
@@ -16,7 +16,7 @@
 					"batchCount": 4,
 					"activities": [
 						{
-							"name": "ET-1-1-Execute Pipeline ETL Sub",
+							"name": "ETL-1-1-Execute Pipeline ETL Sub",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],

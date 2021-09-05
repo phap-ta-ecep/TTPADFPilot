@@ -3,8 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Check file_status ER",
-				"description": "if count of 'EF' file > 0 => stop copy file to DB on configId",
+				"name": "ETL-1-1-1-Lookup file_status is ER",
+				"description": "Get list file name with configId=$id and file_status='ER'",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -33,11 +33,12 @@
 				}
 			},
 			{
-				"name": "ForEach to Extract From File To DB",
+				"name": "ETL-1-1-3-ForEach",
+				"description": "For loop list file from result lookup",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Truncate temp table",
+						"activity": "ETL-1-1-2-Truncate temp table",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -813,12 +814,12 @@
 				}
 			},
 			{
-				"name": "Truncate temp table",
-				"description": "If temp table is exists => truncate table",
+				"name": "ETL-1-1-2-Truncate temp table",
+				"description": "",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Check file_status ER",
+						"activity": "ETL-1-1-1-Lookup file_status is ER",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -854,7 +855,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "ForEach to Extract From File To DB",
+						"activity": "ETL-1-1-3-ForEach",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -1013,7 +1014,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "ForEach to Extract From File To DB",
+						"activity": "ETL-1-1-3-ForEach",
 						"dependencyConditions": [
 							"Failed"
 						]
