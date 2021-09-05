@@ -301,7 +301,7 @@
 										}
 									},
 									{
-										"name": "TR-1-8-3-Pipeline to control error_copy1",
+										"name": "TR-1-8-3-Pipeline to control error",
 										"type": "ExecutePipeline",
 										"dependsOn": [
 											{
@@ -347,7 +347,7 @@
 										}
 									},
 									{
-										"name": "TR-1-8-4- Set variable isTransferError to True_copy1",
+										"name": "TR-1-8-4- Set variable isTransferError to True",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
