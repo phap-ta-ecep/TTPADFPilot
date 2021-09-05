@@ -1,0 +1,26 @@
+{
+	"name": "DS_Pilot_SQL_AWS_DES",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AWS_SqlServer",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"dbName": {
+					"value": "@dataset().dbName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"dbName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}

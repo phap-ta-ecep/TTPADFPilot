@@ -1,0 +1,485 @@
+{
+	"name": "plp_Transfer_Data_To_PilotDesDB",
+	"properties": {
+		"activities": [
+			{
+				"name": "TR-1-Get transfer process information",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete,\nREPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+'Type' as table_type,\n'[stg].[usp_transfer_Board_' + REPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+']' as transfer_sp\nFROM [control].[process] a\nINNER JOIN [control].[process_concurrent_trans] b ON a.process_id = b.process_id\nWHERE a.process_config_id = @{pipeline().parameters.processConfigId} AND a.process_status ='PS';",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_Pilot_SQL_Broad",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "Null",
+							"schema": "Null"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "TR-2-ForEach-lookup results",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "TR-1-Get transfer process information",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('TR-1-Get transfer process information').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "TR-1-1- Set variable startExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "startExecutionId",
+								"value": {
+									"value": "@item().start_execution_id",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-2- Set variable endExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "endExcutionId",
+								"value": {
+									"value": "@item().end_execution_id",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-4- Set variable concurrentTransName_copy1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "concurrentTransName",
+								"value": {
+									"value": "@item().concurrent_trans_name",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-3- Set variable isComplete",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "isComplete",
+								"value": {
+									"value": "@item().is_complete",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-8-IF- Data has changed",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "TR-1-1- Set variable startExecutionId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2- Set variable endExecutionId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-4- Set variable concurrentTransName_copy1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-3- Set variable isComplete",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-5- Set variable tableType",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-6- Set variable processId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-7- Set variable transferSP",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(variables('endExcutionId'), variables('startExecutionId'))",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "TR-1-8-1-Update isComplete-to-1",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "TR-1-8-1-Transfer data to Des DB",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "select * from @{variables('concurrentTransName')}\nwhere ODSLastUpdateExecutionId > @{variables('startExecutionId')} \nand ODSLastUpdateExecutionId <= @{variables('endExcutionId')}\n;",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"sink": {
+												"type": "SqlServerSink",
+												"sqlWriterStoredProcedureName": {
+													"value": "@variables('transferSPName')",
+													"type": "Expression"
+												},
+												"sqlWriterTableType": {
+													"value": "@variables('tableType')",
+													"type": "Expression"
+												},
+												"storedProcedureTableTypeParameterName": "source",
+												"disableMetricsCollection": false
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_Pilot_SQL_Broad",
+												"type": "DatasetReference",
+												"parameters": {
+													"tableName": "Null",
+													"schema": "Null"
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_Pilot_SQL_AWS_DES",
+												"type": "DatasetReference",
+												"parameters": {
+													"dbName": "pilotDesDB"
+												}
+											}
+										]
+									},
+									{
+										"name": "TR-1-8-2-Update status sub-transfer to successful",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-1-Transfer data to Des DB",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[ods].[ctl_transfer_process_log]",
+											"storedProcedureParameters": {
+												"configId": {
+													"value": {
+														"value": "@variables('configId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"endExecutionId": {
+													"value": {
+														"value": "@variables('endExcutionId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"runId": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"startExecutionId": {
+													"value": {
+														"value": "@variables('startExecutionId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"tableName": {
+													"value": {
+														"value": "@variables('odsTableName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "TR-1-8-3-Pipeline to control error_copy1",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-1-Transfer data to Des DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "plp_Control_Pipeline_Fail",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"PipelineName": {
+													"value": "@pipeline().Pipeline",
+													"type": "Expression"
+												},
+												"DataFactoryName": {
+													"value": "@pipeline().DataFactory",
+													"type": "Expression"
+												},
+												"ErrorMessage": {
+													"value": "@activity('TR-1-8-1-Transfer data to Des DB').output.errors[0].Message",
+													"type": "Expression"
+												},
+												"RunID": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"TriggerName": {
+													"value": "@pipeline().TriggerName",
+													"type": "Expression"
+												},
+												"TriggerTime": {
+													"value": "@pipeline().TriggerTime",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									{
+										"name": "TR-1-8-4- Set variable isTransferError to True_copy1",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-1-Transfer data to Des DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isTransferError",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "TR-1-6- Set variable processId",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "processId",
+								"value": {
+									"value": "@item().process_id",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-5- Set variable tableType",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tableType",
+								"value": {
+									"value": "@item().table_type",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "TR-1-7- Set variable transferSP",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "transferSPName",
+								"value": {
+									"value": "@item().transfer_sp",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "TR-3-Successfull",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TR-2-ForEach-lookup results",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			},
+			{
+				"name": "TR-4-Error",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "TR-2-ForEach-lookup results",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			}
+		],
+		"parameters": {
+			"processConfigId": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"startExecutionId": {
+				"type": "String"
+			},
+			"endExcutionId": {
+				"type": "String"
+			},
+			"isTransferError": {
+				"type": "Boolean",
+				"defaultValue": false
+			},
+			"transferSPName": {
+				"type": "String"
+			},
+			"processId": {
+				"type": "String"
+			},
+			"concurrentTransName": {
+				"type": "String"
+			},
+			"isComplete": {
+				"type": "String"
+			},
+			"tableType": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Pilot"
+		},
+		"annotations": []
+	}
+}

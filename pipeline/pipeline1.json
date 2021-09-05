@@ -3,8 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy data1",
-				"type": "Copy",
+				"name": "TR-1-2-Get process concurrent trans infor",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -17,49 +17,23 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderStoredProcedureName": "[dbo].[testTranser]",
+						"sqlReaderQuery": {
+							"value": "SELECT a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete,\nREPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+'Type' as table_type,\n'[stg].[usp_transfer_Board_' + REPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+']' as transfer_sp\nFROM control.process a\nINNER JOIN control.process_concurrent_trans b ON a.process_id = b.process_id\nWHERE a.process_config_id = 1 AND a.process_status ='PS';",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"sqlWriterStoredProcedureName": {
-							"value": "@variables('storeProcedure')",
-							"type": "Expression"
-						},
-						"sqlWriterTableType": {
-							"value": "@variables('tableType')",
-							"type": "Expression"
-						},
-						"storedProcedureTableTypeParameterName": "source",
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
+					"dataset": {
 						"referenceName": "DS_Pilot_SQL_Broad",
 						"type": "DatasetReference",
 						"parameters": {
 							"tableName": "Null",
 							"schema": "Null"
 						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DS_Pilot_SQL_STG_Broad",
-						"type": "DatasetReference"
-					}
-				]
+					},
+					"firstRowOnly": false
+				}
 			}
 		],
 		"parameters": {
