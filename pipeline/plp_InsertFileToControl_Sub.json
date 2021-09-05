@@ -81,7 +81,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[InsertControlDataFile]",
+								"storedProcedureName": "[ods].[ctl_insert_Control_Data_File]",
 								"storedProcedureParameters": {
 									"ConfigId": {
 										"value": {
