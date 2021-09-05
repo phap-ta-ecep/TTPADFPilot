@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get Metadata1",
+				"name": "IS-2-1-Get Metadata",
 				"type": "GetMetadata",
 				"dependsOn": [],
 				"policy": {
@@ -50,11 +50,11 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "IS-2-3-ForEach filter metadata result",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Filter Files",
+						"activity": "IS-2-2-Filter Files",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -69,7 +69,7 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Insert fileName to datafile",
+							"name": "IS-2-3-1 Insert fileName to control data_file",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -129,11 +129,11 @@
 				}
 			},
 			{
-				"name": "Filter Files",
+				"name": "IS-2-2-Filter Files",
 				"type": "Filter",
 				"dependsOn": [
 					{
-						"activity": "Get Metadata1",
+						"activity": "IS-2-1-Get Metadata",
 						"dependencyConditions": [
 							"Succeeded"
 						]
