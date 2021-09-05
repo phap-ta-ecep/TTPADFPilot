@@ -61,7 +61,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "plp_MergeODSToSTG",
+						"referenceName": "plp_SyncODSToSTG",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true

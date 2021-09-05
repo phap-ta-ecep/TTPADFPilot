@@ -1,5 +1,5 @@
 {
-	"name": "plp_MergeODSToSTG",
+	"name": "plp_SyncODSToSTG",
 	"properties": {
 		"activities": [
 			{
