@@ -894,7 +894,7 @@
 			},
 			{
 				"name": "ETL-1-1-7 IF Count Of Current Date  Greater Than 0",
-				"description": "If startExecutionId < ",
+				"description": "If ( count from $tempTable where [Date_Time] <= @current_up_to) > 0",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -912,7 +912,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Wait1",
+							"name": "ETL-1-1-7-3 Wait 1s",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -1137,7 +1137,7 @@
 				}
 			},
 			{
-				"name": "Write log and send mail - current up to",
+				"name": "ETL-1-1-8 Write log and send mail - current up to",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -1180,11 +1180,11 @@
 				}
 			},
 			{
-				"name": "Refresh  status file to ER_1",
+				"name": "ETL-1-1-9 Refresh  status file to ER",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Write log and send mail - current up to",
+						"activity": "ETL-1-1-8 Write log and send mail - current up to",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -1199,7 +1199,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+					"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 					"storedProcedureParameters": {
 						"fileName": {
 							"value": null,
