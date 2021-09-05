@@ -624,7 +624,7 @@
 							}
 						},
 						{
-							"name": "Update status SU",
+							"name": "ETL-1-1-6-2 Update status SU",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
@@ -643,7 +643,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
@@ -676,11 +676,11 @@
 							}
 						},
 						{
-							"name": "Move Files To Done Folder",
+							"name": "ETL-1-1-6-4 Move Files To Done Folder",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Update status SU",
+									"activity": "ETL-1-1-6-2 Update status SU",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -718,7 +718,7 @@
 							}
 						},
 						{
-							"name": "Refresh  status file to ER_2",
+							"name": "ETL-1-1-6-3 Refresh  status file to ER",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
@@ -737,7 +737,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
@@ -770,11 +770,11 @@
 							}
 						},
 						{
-							"name": "Write log and send mail - merge data",
+							"name": "ETL-1-1-6-5 Write log and send mail - merge data",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Refresh  status file to ER_2",
+									"activity": "ETL-1-1-6-3 Refresh  status file to ER",
 									"dependencyConditions": [
 										"Completed"
 									]
