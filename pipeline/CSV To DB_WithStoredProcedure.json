@@ -39,10 +39,6 @@
 					"sink": {
 						"type": "AzureSqlSink",
 						"sqlWriterStoredProcedureName": "[dbo].[usp_CopyFileInformation]",
-						"sqlWriterTableType": {
-							"value": "@pipeline().parameters.tableType",
-							"type": "Expression"
-						},
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
