@@ -25,6 +25,14 @@
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
+					"dataset": {
+						"referenceName": "DS_Pilot_SQL_Broad",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "Null",
+							"schema": "Null"
+						}
+					},
 					"firstRowOnly": false
 				}
 			},
