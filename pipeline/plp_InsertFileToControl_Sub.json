@@ -20,20 +20,6 @@
 					}
 				],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "PilotInputFiles",
-						"type": "DatasetReference",
-						"parameters": {
-							"Container": {
-								"value": "@pipeline().parameters.Container",
-								"type": "Expression"
-							},
-							"Directory": {
-								"value": "@pipeline().parameters.Directory",
-								"type": "Expression"
-							}
-						}
-					},
 					"fieldList": [
 						"itemName",
 						"itemType",
