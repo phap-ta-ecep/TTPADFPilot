@@ -1,0 +1,39 @@
+{
+	"name": "TG_ETL_Pilot_Data",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "plp_Master_Process",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"listConfigId_S": "1,2,3,4,5,6,7,8,9",
+					"listConfigId_Ar": [
+						"1",
+						"2",
+						"3",
+						"4",
+						"5",
+						"6",
+						"7",
+						"8",
+						"9"
+					]
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2021-09-07T08:00:00Z",
+				"endTime": "2021-09-08T07:49:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
