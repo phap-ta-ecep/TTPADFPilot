@@ -4,7 +4,7 @@
 		"description": "pipeline copy data from csv to sql db",
 		"activities": [
 			{
-				"name": "Copy CSV TO SQL",
+				"name": "1-Copy CSV TO SQL",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
