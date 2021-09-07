@@ -49,7 +49,7 @@
 			"properties": {
 				"description": "Scheduler for transfer data from DW to PilotDesDB",
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
