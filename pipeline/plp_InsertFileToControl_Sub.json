@@ -20,11 +20,21 @@
 					}
 				],
 				"typeProperties": {
-					"fieldList": [
-						"itemName",
-						"itemType",
-						"childItems"
-					],
+					"dataset": {
+						"referenceName": "DS_Pliot_Metadata_Board",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
+								"value": "@pipeline().parameters.Container",
+								"type": "Expression"
+							},
+							"Directory": {
+								"value": "@pipeline().parameters.Directory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [],
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
 						"recursive": true,
