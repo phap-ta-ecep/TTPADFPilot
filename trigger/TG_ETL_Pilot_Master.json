@@ -31,9 +31,9 @@
 			"recurrence": {
 				"frequency": "Hour",
 				"interval": 1,
-				"startTime": "2021-09-07T04:11:00Z",
-				"endTime": "2021-09-08T04:11:00Z",
-				"timeZone": "UTC"
+				"startTime": "2021-09-07T04:11:00",
+				"endTime": "2021-09-08T04:11:00",
+				"timeZone": "Pacific Standard Time"
 			}
 		}
 	}
