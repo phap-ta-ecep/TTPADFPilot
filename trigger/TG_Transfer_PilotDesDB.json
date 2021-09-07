@@ -1,0 +1,29 @@
+{
+	"name": "TG_Transfer_PilotDesDB",
+	"properties": {
+		"description": "Scheduler for transfer data from DW to PilotDesDB",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "plp_Transfer_Data_To_PilotDesDB",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"processConfigId": 1
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 2,
+				"startTime": "2021-09-07T03:57:00Z",
+				"endTime": "2021-09-08T03:57:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
