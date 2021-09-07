@@ -163,7 +163,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(int(variables('endExcutionId')), int(variables('startExecutionId')))",
+									"value": "@and(\ngreater(int(variables('endExcutionId')), int(variables('startExecutionId'))),\nequals(variables('isComplete'),'0')\n)",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
