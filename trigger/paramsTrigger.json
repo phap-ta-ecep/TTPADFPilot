@@ -3,18 +3,7 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [
-			{
-				"pipelineReference": {
-					"referenceName": "pipelineUseParams",
-					"type": "PipelineReference"
-				},
-				"parameters": {
-					"pipelineTableName": "Cars",
-					"pipelineDBName": "ttp_sqldatabase"
-				}
-			}
-		],
+		"pipelines": [],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
