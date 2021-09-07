@@ -5,6 +5,9 @@
 			"referenceName": "inputBlod",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {

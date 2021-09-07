@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
+				"name": "IS-1-Lookup-infor-list-configuration",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -32,11 +32,11 @@
 				}
 			},
 			{
-				"name": "ForEach Data File Configuration",
+				"name": "IS-2-ForEach-lookup results",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "IS-1-Lookup-infor-list-configuration",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -45,13 +45,13 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup1').output.value",
+						"value": "@activity('IS-1-Lookup-infor-list-configuration').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Execute Pipeline1",
+							"name": "IS-2-1-Execute Pipeline InsertFileToControl_Sub",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],

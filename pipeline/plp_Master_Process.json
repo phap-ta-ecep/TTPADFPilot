@@ -48,7 +48,7 @@
 				}
 			},
 			{
-				"name": "MP-3-Transfer data from ods to stg",
+				"name": "MP-3-Sync data from ODS to STG",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -61,10 +61,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "plp_MergeODSToSTG",
+						"referenceName": "plp_SyncODSToSTG",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"listConfigId_Ar": {
+							"value": "@pipeline().parameters.listConfigId_Ar",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],

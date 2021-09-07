@@ -74,6 +74,9 @@
 				]
 			}
 		],
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [
 			"APIToFile"
 		],

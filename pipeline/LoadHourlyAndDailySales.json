@@ -45,6 +45,9 @@
 				"type": "String"
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [],
 		"lastPublishTime": "2021-08-11T14:34:46Z"
 	},

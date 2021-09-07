@@ -1,5 +1,5 @@
 {
-	"name": "plp_MergeODSToSTG_Sub",
+	"name": "plp_SyncODSToSTG_Sub",
 	"properties": {
 		"activities": [
 			{
@@ -359,7 +359,7 @@
 			}
 		},
 		"folder": {
-			"name": "Pilot"
+			"name": "Test"
 		},
 		"annotations": []
 	}

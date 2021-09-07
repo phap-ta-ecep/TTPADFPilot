@@ -135,6 +135,9 @@
 				"defaultValue": "Broad/test"
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": []
 	}
 }

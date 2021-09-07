@@ -96,6 +96,9 @@
 				"defaultValue": "\t"
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [
 			"CSVToDB"
 		],

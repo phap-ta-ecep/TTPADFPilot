@@ -97,6 +97,9 @@
 				]
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [],
 		"lastPublishTime": "2021-08-13T08:15:57Z"
 	},

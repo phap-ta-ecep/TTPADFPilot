@@ -1,5 +1,5 @@
 {
-	"name": "plp_MergeODSToSTG",
+	"name": "plp_SyncODSToSTG",
 	"properties": {
 		"activities": [
 			{
@@ -37,7 +37,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\n\nEXEC [dbo].[usp_get_Infor_ExecutionLogId_Broad] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @odsTableName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName\n",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\n\nEXEC [ods].[ctl_get_ExecutionLogId_Information] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @odsTableName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -115,7 +115,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[ods].[ctl_transfer_process_log]",
+											"storedProcedureName": "[ods].[ctl_etl_process_log]",
 											"storedProcedureParameters": {
 												"configId": {
 													"value": {
@@ -238,7 +238,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[stg].[usp_merge_ODS_To_STG_Board_Wrapper]",
+											"storedProcedureName": "[stg].[usp_merge_ODS_To_STG_Process_Wrapper]",
 											"storedProcedureParameters": {
 												"configId": {
 													"value": {
@@ -368,7 +368,7 @@
 				}
 			},
 			{
-				"name": "TR-2-1- Got error in transfer",
+				"name": "TR-2-1- Got error in Sync data",
 				"type": "Wait",
 				"dependsOn": [
 					{
@@ -413,7 +413,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "TR-2-2-1-Lastest Update Guid On STG",
+							"name": "TR-2-2-1-Lastest Update STG Guid",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {

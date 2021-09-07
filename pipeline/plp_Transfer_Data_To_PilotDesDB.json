@@ -5,7 +5,14 @@
 			{
 				"name": "TR-1-Get transfer process information",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "TR-0 Insert process",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -18,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete,\nREPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+'Type' as table_type,\n'[stg].[usp_transfer_Board_' + REPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+']' as transfer_sp\nFROM [control].[process] a\nINNER JOIN [control].[process_concurrent_trans] b ON a.process_id = b.process_id\nWHERE a.process_config_id = @{pipeline().parameters.processConfigId} AND a.process_status ='PS';",
+							"value": "SELECT a.process_id, b.concurrent_trans_name, b.start_execution_id, b.end_execution_id, b.is_complete,\nREPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+'Type' as table_type,\n'[stg].[usp_transfer_Board_' + REPLACE(REPLACE(SUBSTRING( b.concurrent_trans_name ,CHARINDEX('.',  b.concurrent_trans_name)+1 , LEN( b.concurrent_trans_name)), '[' ,''), ']','')+']' as transfer_sp\nFROM [control].[process] a\nINNER JOIN [control].[process_concurrent_trans] b ON a.process_id = b.process_id\nWHERE a.process_config_id = @{pipeline().parameters.processConfigId} AND a.process_status ='PR';",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -62,7 +69,7 @@
 							"typeProperties": {
 								"variableName": "startExecutionId",
 								"value": {
-									"value": "@item().start_execution_id",
+									"value": "@string(item().start_execution_id)",
 									"type": "Expression"
 								}
 							}
@@ -75,7 +82,7 @@
 							"typeProperties": {
 								"variableName": "endExcutionId",
 								"value": {
-									"value": "@item().end_execution_id",
+									"value": "@string(item().end_execution_id)",
 									"type": "Expression"
 								}
 							}
@@ -101,7 +108,7 @@
 							"typeProperties": {
 								"variableName": "isComplete",
 								"value": {
-									"value": "@item().is_complete",
+									"value": "@string(item().is_complete)",
 									"type": "Expression"
 								}
 							}
@@ -156,17 +163,63 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(variables('endExcutionId'), variables('startExecutionId'))",
+									"value": "@and(\ngreater(int(variables('endExcutionId')), int(variables('startExecutionId'))),\nequals(variables('isComplete'),'0')\n)",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
 									{
-										"name": "TR-1-8-1-Update isComplete-to-1",
-										"type": "Wait",
+										"name": "TR-1-8-1-Update sub process status",
+										"type": "SqlServerStoredProcedure",
 										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
-											"waitTimeInSeconds": 1
+											"storedProcedureName": "[ods].[ctl_update_Process_Status]",
+											"storedProcedureParameters": {
+												"concurrentTransName": {
+													"value": {
+														"value": "@variables('concurrentTransName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"isComplete": {
+													"value": "1",
+													"type": "Int32"
+												},
+												"pipelineRunId": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"processId": {
+													"value": {
+														"value": "@variables('processId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"processStatus": {
+													"value": null,
+													"type": "String"
+												},
+												"updateType": {
+													"value": "1",
+													"type": "Int32"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
 										}
 									}
 								],
@@ -237,7 +290,7 @@
 										]
 									},
 									{
-										"name": "TR-1-8-2-Update status sub-transfer to successful",
+										"name": "TR-1-8-2-Update sub process status",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
@@ -256,42 +309,40 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[ods].[ctl_transfer_process_log]",
+											"storedProcedureName": "[ods].[ctl_update_Process_Status]",
 											"storedProcedureParameters": {
-												"configId": {
+												"concurrentTransName": {
 													"value": {
-														"value": "@variables('configId')",
+														"value": "@variables('concurrentTransName')",
 														"type": "Expression"
 													},
+													"type": "String"
+												},
+												"isComplete": {
+													"value": "1",
 													"type": "Int32"
 												},
-												"endExecutionId": {
-													"value": {
-														"value": "@variables('endExcutionId')",
-														"type": "Expression"
-													},
-													"type": "Int32"
-												},
-												"runId": {
+												"pipelineRunId": {
 													"value": {
 														"value": "@pipeline().RunId",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
-												"startExecutionId": {
+												"processId": {
 													"value": {
-														"value": "@variables('startExecutionId')",
+														"value": "@variables('processId')",
 														"type": "Expression"
 													},
 													"type": "Int32"
 												},
-												"tableName": {
-													"value": {
-														"value": "@variables('odsTableName')",
-														"type": "Expression"
-													},
+												"processStatus": {
+													"value": null,
 													"type": "String"
+												},
+												"updateType": {
+													"value": "1",
+													"type": "Int32"
 												}
 											}
 										},
@@ -301,7 +352,7 @@
 										}
 									},
 									{
-										"name": "TR-1-8-3-Pipeline to control error_copy1",
+										"name": "TR-1-8-3-Pipeline to control error",
 										"type": "ExecutePipeline",
 										"dependsOn": [
 											{
@@ -345,26 +396,6 @@
 												}
 											}
 										}
-									},
-									{
-										"name": "TR-1-8-4- Set variable isTransferError to True_copy1",
-										"type": "SetVariable",
-										"dependsOn": [
-											{
-												"activity": "TR-1-8-1-Transfer data to Des DB",
-												"dependencyConditions": [
-													"Failed"
-												]
-											}
-										],
-										"userProperties": [],
-										"typeProperties": {
-											"variableName": "isTransferError",
-											"value": {
-												"value": "@bool(1)",
-												"type": "Expression"
-											}
-										}
 									}
 								]
 							}
@@ -377,7 +408,7 @@
 							"typeProperties": {
 								"variableName": "processId",
 								"value": {
-									"value": "@item().process_id",
+									"value": "@string(item().process_id)",
 									"type": "Expression"
 								}
 							}
@@ -412,8 +443,8 @@
 				}
 			},
 			{
-				"name": "TR-3-Successfull",
-				"type": "Wait",
+				"name": "TR-3-Update process status SU",
+				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
 						"activity": "TR-2-ForEach-lookup results",
@@ -422,25 +453,84 @@
 						]
 					}
 				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"waitTimeInSeconds": 1
+					"storedProcedureName": "[ods].[ctl_update_Process_Status]",
+					"storedProcedureParameters": {
+						"concurrentTransName": {
+							"value": {
+								"value": "@variables('concurrentTransName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"isComplete": {
+							"value": null,
+							"type": "Int32"
+						},
+						"pipelineRunId": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"processId": {
+							"value": {
+								"value": "@variables('processId')",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"processStatus": {
+							"value": "SU",
+							"type": "String"
+						},
+						"updateType": {
+							"value": "2",
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "TR-4-Error",
-				"type": "Wait",
-				"dependsOn": [
-					{
-						"activity": "TR-2-ForEach-lookup results",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
+				"name": "TR-0 Insert process",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"waitTimeInSeconds": 1
+					"storedProcedureName": "[stg].[usp_transfer_Board_To_PilotDesDB]",
+					"storedProcedureParameters": {
+						"pipeline_run_id": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "connectSQL",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],

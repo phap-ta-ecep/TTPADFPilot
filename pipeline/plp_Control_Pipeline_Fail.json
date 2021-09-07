@@ -47,7 +47,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[usp_adfPipelineExcutions]",
+					"storedProcedureName": "[ods].[ctl_pipeline_Excutions_Fail_Log]",
 					"storedProcedureParameters": {
 						"adfName": {
 							"value": {

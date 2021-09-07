@@ -223,6 +223,9 @@
 				]
 			}
 		],
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": [
 			"DBToFile"
 		],

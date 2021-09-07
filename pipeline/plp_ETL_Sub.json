@@ -3,8 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Check file_status ER",
-				"description": "if count of 'EF' file > 0 => stop copy file to DB on configId",
+				"name": "ETL-1-1-1-Lookup file_status is ER",
+				"description": "Get list file name with configId=$id and file_status='ER'",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -33,11 +33,12 @@
 				}
 			},
 			{
-				"name": "ForEach to Extract From File To DB",
+				"name": "ETL-1-1-3-ForEach",
+				"description": "For loop list file from result lookup",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Truncate temp table",
+						"activity": "ETL-1-1-2-Truncate temp table",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -46,53 +47,54 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Check file_status ER').output.value",
+						"value": "@activity('ETL-1-1-1-Lookup file_status is ER').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "If Condition Check isExtractFail",
+							"name": "ETL-1-1-3-8 IF Check isExtractFail",
+							"description": "If isExtractFail = true => stop process extract file from file to ods on configId",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "Set Container",
+									"activity": "ETL-1-1-3-1-Set variable Container",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "Set fileName",
+									"activity": "ETL-1-1-3-3 Set variable fileName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "Set Directory",
+									"activity": "ETL-1-1-3-2-Set variable Directory",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "Set sinkSchema",
+									"activity": "ETL-1-1-3-4-Set variable sinkSchema",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "Set sinkTableName",
+									"activity": "ETL-1-1-3-5 Set variable sinkTableName",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "Set desDirectory",
+									"activity": "ETL-1-1-3-6 Set variable desDirectory",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "Set columnDelimiter",
+									"activity": "ETL-1-1-3-7 Set variable columnDelimiter",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -106,7 +108,7 @@
 								},
 								"ifFalseActivities": [
 									{
-										"name": "Copy file to DB",
+										"name": "ETL-1-1-3-8-1 Copy file to temp table",
 										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
@@ -182,11 +184,11 @@
 										]
 									},
 									{
-										"name": "Set isExtractFail  is True",
+										"name": "ETL-1-1-3-8-7 Set isExtractFail  is True",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "Update status to EF",
+												"activity": "ETL-1-1-3-8-3 Update status to EF",
 												"dependencyConditions": [
 													"Completed"
 												]
@@ -202,11 +204,11 @@
 										}
 									},
 									{
-										"name": "Append fileName to listFileName",
+										"name": "ETL-1-1-3-8-8 Append fileName to listFileName",
 										"type": "AppendVariable",
 										"dependsOn": [
 											{
-												"activity": "Update data_file_guid to temp table",
+												"activity": "ETL-1-1-3-8-5 Update guid to temp table",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -222,11 +224,11 @@
 										}
 									},
 									{
-										"name": "Update data_file_guid to temp table",
+										"name": "ETL-1-1-3-8-5 Update guid to temp table",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "Update status to TR",
+												"activity": "ETL-1-1-3-8-2 Update status to TR",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -241,7 +243,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[dbo].[UpdateDataFileGuid]",
+											"storedProcedureName": "[ods].[ctl_update_Data_File_Id]",
 											"storedProcedureParameters": {
 												"fileName": {
 													"value": {
@@ -265,11 +267,11 @@
 										}
 									},
 									{
-										"name": "Update status to EF",
+										"name": "ETL-1-1-3-8-3 Update status to EF",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "Copy file to DB",
+												"activity": "ETL-1-1-3-8-1 Copy file to temp table",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -284,7 +286,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 											"storedProcedureParameters": {
 												"fileName": {
 													"value": {
@@ -326,12 +328,12 @@
 										}
 									},
 									{
-										"name": "Update status to TR",
+										"name": "ETL-1-1-3-8-2 Update status to TR",
 										"description": "TR : transfrom ready",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "Copy file to DB",
+												"activity": "ETL-1-1-3-8-1 Copy file to temp table",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -346,7 +348,7 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+											"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 											"storedProcedureParameters": {
 												"fileName": {
 													"value": {
@@ -364,14 +366,14 @@
 												},
 												"source_count": {
 													"value": {
-														"value": "@activity('Copy file to DB').output.rowsRead",
+														"value": "@activity('ETL-1-1-3-8-1 Copy file to temp table').output.rowsRead",
 														"type": "Expression"
 													},
 													"type": "Int32"
 												},
 												"staging_load_count": {
 													"value": {
-														"value": "@activity('Copy file to DB').output.rowsCopied",
+														"value": "@activity('ETL-1-1-3-8-1 Copy file to temp table').output.rowsCopied",
 														"type": "Expression"
 													},
 													"type": "Int32"
@@ -388,11 +390,11 @@
 										}
 									},
 									{
-										"name": "Set isExtractFail  is True_copy1",
+										"name": "ETL-1-1-3-8-6 Set isExtractFail  is True_copy1",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "Update status to TR",
+												"activity": "ETL-1-1-3-8-2 Update status to TR",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -408,11 +410,11 @@
 										}
 									},
 									{
-										"name": "Set isExtractFail  is True_copy2",
+										"name": "ETL-1-1-3-8-9 Set isExtractFail  is True_copy2",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "Update data_file_guid to temp table",
+												"activity": "ETL-1-1-3-8-5 Update guid to temp table",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -428,11 +430,11 @@
 										}
 									},
 									{
-										"name": "Set errorMessage",
+										"name": "ETL-1-1-3-8-4 Set errorMessage",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
-												"activity": "Copy file to DB",
+												"activity": "ETL-1-1-3-8-1 Copy file to temp table",
 												"dependencyConditions": [
 													"Failed"
 												]
@@ -442,7 +444,7 @@
 										"typeProperties": {
 											"variableName": "errorMessage",
 											"value": {
-												"value": "@activity('Copy file to DB').Error.Message",
+												"value": "@activity('ETL-1-1-3-8-1 Copy file to temp table').Error.Message",
 												"type": "Expression"
 											}
 										}
@@ -450,7 +452,7 @@
 								],
 								"ifTrueActivities": [
 									{
-										"name": "Exit by Extract Fail",
+										"name": "ETL-1-1-3-8-1 Exit by Extract Fail",
 										"type": "Wait",
 										"dependsOn": [],
 										"userProperties": [],
@@ -462,7 +464,7 @@
 							}
 						},
 						{
-							"name": "Set Container",
+							"name": "ETL-1-1-3-1-Set variable Container",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -475,7 +477,7 @@
 							}
 						},
 						{
-							"name": "Set Directory",
+							"name": "ETL-1-1-3-2-Set variable Directory",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -488,7 +490,7 @@
 							}
 						},
 						{
-							"name": "Set fileName",
+							"name": "ETL-1-1-3-3 Set variable fileName",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -501,7 +503,7 @@
 							}
 						},
 						{
-							"name": "Set sinkSchema",
+							"name": "ETL-1-1-3-4-Set variable sinkSchema",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -514,7 +516,7 @@
 							}
 						},
 						{
-							"name": "Set sinkTableName",
+							"name": "ETL-1-1-3-5 Set variable sinkTableName",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -527,7 +529,7 @@
 							}
 						},
 						{
-							"name": "Set desDirectory",
+							"name": "ETL-1-1-3-6 Set variable desDirectory",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -540,7 +542,7 @@
 							}
 						},
 						{
-							"name": "Set columnDelimiter",
+							"name": "ETL-1-1-3-7 Set variable columnDelimiter",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -556,11 +558,12 @@
 				}
 			},
 			{
-				"name": "Check To Merge Data",
+				"name": "ETL-1-1-6 Check To Merge Data",
+				"description": "if [Datetime] > [Datetime] Lastest Extract => start merge data from temp table to ODS",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Check Current-Up-To With File DateTime",
+						"activity": "ETL-1-1-4-Check current up to date",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -569,12 +572,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(and( not(variables('isExtractFail')) , greater(activity('Check file_status ER').output.count, 0)),\nequals(activity('Check Current-Up-To With File DateTime').output.firstRow.Ncount, 0)\n)",
+						"value": "@and(and( not(variables('isExtractFail')) , greater(activity('ETL-1-1-1-Lookup file_status is ER').output.count, 0)),\nequals(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Exit by missing data or no ETL file",
+							"name": "ETL-1-1-6-6 Exit merge process",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -585,7 +588,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Merge data from temp to ODS",
+							"name": "ETL-1-1-6-1 Merge data from temp to ODS",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -597,7 +600,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[ods].[usp_merge_process_wrapper]",
+								"storedProcedureName": "[ods].[ctl_merge_Broad_Process_Wrapper]",
 								"storedProcedureParameters": {
 									"configId": {
 										"value": {
@@ -621,11 +624,11 @@
 							}
 						},
 						{
-							"name": "Update status SU",
+							"name": "ETL-1-1-6-2 Update status SU",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Merge data from temp to ODS",
+									"activity": "ETL-1-1-6-1 Merge data from temp to ODS",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -640,7 +643,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
@@ -673,11 +676,11 @@
 							}
 						},
 						{
-							"name": "Move Files To Done Folder",
+							"name": "ETL-1-1-6-4 Move Files To Done Folder",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Update status SU",
+									"activity": "ETL-1-1-6-2 Update status SU",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -715,11 +718,11 @@
 							}
 						},
 						{
-							"name": "Refresh  status file to ER_2",
+							"name": "ETL-1-1-6-3 Refresh  status file to ER",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Merge data from temp to ODS",
+									"activity": "ETL-1-1-6-1 Merge data from temp to ODS",
 									"dependencyConditions": [
 										"Failed"
 									]
@@ -734,7 +737,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
@@ -767,11 +770,11 @@
 							}
 						},
 						{
-							"name": "Write log and send mail - merge data",
+							"name": "ETL-1-1-6-5 Write log and send mail - merge data",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Refresh  status file to ER_2",
+									"activity": "ETL-1-1-6-3 Refresh  status file to ER",
 									"dependencyConditions": [
 										"Completed"
 									]
@@ -813,12 +816,12 @@
 				}
 			},
 			{
-				"name": "Truncate temp table",
-				"description": "If temp table is exists => truncate table",
+				"name": "ETL-1-1-2-Truncate temp table",
+				"description": "",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Check file_status ER",
+						"activity": "ETL-1-1-1-Lookup file_status is ER",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -833,7 +836,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[TruncateTempTable]",
+					"storedProcedureName": "[ods].[ctl_truncate_Temp_Table]",
 					"storedProcedureParameters": {
 						"configId": {
 							"value": {
@@ -850,11 +853,12 @@
 				}
 			},
 			{
-				"name": "Check Current-Up-To With File DateTime",
+				"name": "ETL-1-1-4-Check current up to date",
+				"description": "",
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "ForEach to Extract From File To DB",
+						"activity": "ETL-1-1-3-ForEach",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -872,7 +876,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "DECLARE @Ncount INT;\nEXEC dbo.CheckDataCurrentUpToDate  @{pipeline().parameters.configId}, @Ncount OUTPUT;\nSELECT @Ncount AS Ncount;",
+							"value": "DECLARE @Ncount INT;\nEXEC [ods].[ctl_check_Data_Current_Up_To_Date]  @{pipeline().parameters.configId}, @Ncount OUTPUT;\nSELECT @Ncount AS Ncount;",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -889,11 +893,12 @@
 				}
 			},
 			{
-				"name": "IF Count Of Current Date  Greater Than 0",
+				"name": "ETL-1-1-7 IF Count Of Current Date  Greater Than 0",
+				"description": "If ( count from $tempTable where [Date_Time] <= @current_up_to) > 0",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Check Current-Up-To With File DateTime",
+						"activity": "ETL-1-1-4-Check current up to date",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -902,12 +907,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(activity('Check Current-Up-To With File DateTime').output.firstRow.Ncount, 0)\n\n",
+						"value": "@greater(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0)",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Wait1",
+							"name": "ETL-1-1-7-3 Wait 1s",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -918,11 +923,11 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Execute Pipeline To Send Notification",
+							"name": "ETL-1-1-7-2 Execute Pipeline To Send Notification",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Refresh  status file to ER_crd_greater_0",
+									"activity": "ETL-1-1-7-1 Refresh  status file to ER_crd_greater_0",
 									"dependencyConditions": [
 										"Completed"
 									]
@@ -961,7 +966,7 @@
 							}
 						},
 						{
-							"name": "Refresh  status file to ER_crd_greater_0",
+							"name": "ETL-1-1-7-1 Refresh  status file to ER_crd_greater_0",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -973,7 +978,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
@@ -1009,11 +1014,11 @@
 				}
 			},
 			{
-				"name": "Extract Fail",
+				"name": "ETL-1-1-5 Extract Fail",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "ForEach to Extract From File To DB",
+						"activity": "ETL-1-1-3-ForEach",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -1027,7 +1032,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Extract Files Completed",
+							"name": "ETL-1-1-5-1 Extract Files Completed",
 							"type": "Wait",
 							"dependsOn": [],
 							"userProperties": [],
@@ -1038,7 +1043,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Refresh  status file to ER",
+							"name": "ETL-1-1-5-1 Refresh  status file to ER",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -1050,7 +1055,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+								"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 								"storedProcedureParameters": {
 									"fileName": {
 										"value": null,
@@ -1083,11 +1088,11 @@
 							}
 						},
 						{
-							"name": "Write log and send mail - extract fail",
+							"name": "ETL-1-1-5-2-Write log and send mail - extract fail",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Refresh  status file to ER",
+									"activity": "ETL-1-1-5-1 Refresh  status file to ER",
 									"dependencyConditions": [
 										"Completed"
 									]
@@ -1132,11 +1137,11 @@
 				}
 			},
 			{
-				"name": "Write log and send mail - current up to",
+				"name": "ETL-1-1-8 Write log and send mail - current up to",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Check Current-Up-To With File DateTime",
+						"activity": "ETL-1-1-4-Check current up to date",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -1175,11 +1180,11 @@
 				}
 			},
 			{
-				"name": "Refresh  status file to ER_1",
+				"name": "ETL-1-1-9 Refresh  status file to ER",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Write log and send mail - current up to",
+						"activity": "ETL-1-1-8 Write log and send mail - current up to",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -1194,7 +1199,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[UpdateDataFileStatus]",
+					"storedProcedureName": "[ods].[ctl_update_Data_File_Status]",
 					"storedProcedureParameters": {
 						"fileName": {
 							"value": null,
