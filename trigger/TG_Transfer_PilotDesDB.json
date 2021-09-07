@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "Scheduler for transfer data from DW to PilotDesDB",
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
