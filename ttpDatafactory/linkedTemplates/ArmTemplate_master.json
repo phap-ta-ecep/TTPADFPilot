@@ -1,0 +1,251 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ttpDatafactory"
+		},
+		"LS_AWS_SqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_AWS_SqlServer'"
+		},
+		"LS_Connect_STG_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_Connect_STG'"
+		},
+		"PilotConnectODS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'PilotConnectODS'"
+		},
+		"SqlServer1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SqlServer1'"
+		},
+		"connectSQL_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'connectSQL'"
+		},
+		"inputBlod_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'inputBlod'"
+		},
+		"ls_connectDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_connectDB'"
+		},
+		"ls_getMetaDataDataset_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_getMetaDataDataset'"
+		},
+		"HTTP_LogoConnection_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://cdn.rebrickable.com/media/downloads/"
+		},
+		"ls_getMetaDataDataset_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://ttpstaccount.dfs.core.windows.net"
+		},
+		"EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"EventTrigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/26edfad9-6834-4c07-b452-c8877d41c0a3/resourceGroups/ttp_rg_1/providers/Microsoft.Storage/storageAccounts/ttpstaccount"
+		},
+		"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S": {
+			"type": "string",
+			"defaultValue": "1,2,3,4,5,6,7,8,9"
+		},
+		"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_Ar": {
+			"type": "array",
+			"defaultValue": [
+				"1",
+				"2",
+				"3",
+				"4",
+				"5",
+				"6",
+				"7",
+				"8",
+				"9"
+			]
+		},
+		"TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId": {
+			"type": "int",
+			"defaultValue": 1
+		},
+		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName": {
+			"type": "string",
+			"defaultValue": "Cars"
+		},
+		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName": {
+			"type": "string",
+			"defaultValue": "ttp_sqldatabase"
+		},
+		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "ttpsqlserver.database.windows.net"
+		},
+		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ttpadmin"
+		},
+		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ttpDatafactory_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"LS_AWS_SqlServer_connectionString": {
+						"value": "[parameters('LS_AWS_SqlServer_connectionString')]"
+					},
+					"LS_Connect_STG_connectionString": {
+						"value": "[parameters('LS_Connect_STG_connectionString')]"
+					},
+					"PilotConnectODS_connectionString": {
+						"value": "[parameters('PilotConnectODS_connectionString')]"
+					},
+					"SqlServer1_connectionString": {
+						"value": "[parameters('SqlServer1_connectionString')]"
+					},
+					"connectSQL_connectionString": {
+						"value": "[parameters('connectSQL_connectionString')]"
+					},
+					"inputBlod_connectionString": {
+						"value": "[parameters('inputBlod_connectionString')]"
+					},
+					"ls_connectDB_connectionString": {
+						"value": "[parameters('ls_connectDB_connectionString')]"
+					},
+					"ls_getMetaDataDataset_accountKey": {
+						"value": "[parameters('ls_getMetaDataDataset_accountKey')]"
+					},
+					"HTTP_LogoConnection_properties_typeProperties_url": {
+						"value": "[parameters('HTTP_LogoConnection_properties_typeProperties_url')]"
+					},
+					"ls_getMetaDataDataset_properties_typeProperties_url": {
+						"value": "[parameters('ls_getMetaDataDataset_properties_typeProperties_url')]"
+					},
+					"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+						"value": "[parameters('ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
+					},
+					"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+						"value": "[parameters('ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]"
+					},
+					"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+						"value": "[parameters('ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "ttpDatafactory_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName": {
+						"value": "[parameters('EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName')]"
+					},
+					"EventTrigger_properties_typeProperties_scope": {
+						"value": "[parameters('EventTrigger_properties_typeProperties_scope')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ttpDatafactory_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "ttpDatafactory_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ttpDatafactory_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "ttpDatafactory_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId": {
+						"value": "[parameters('TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId')]"
+					},
+					"paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName": {
+						"value": "[parameters('paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName')]"
+					},
+					"paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName": {
+						"value": "[parameters('paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName')]"
+					},
+					"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S": {
+						"value": "[parameters('TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S')]"
+					},
+					"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_Ar": {
+						"value": "[parameters('TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_Ar')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ttpDatafactory_ArmTemplate_2')]"
+			]
+		}
+	]
+}

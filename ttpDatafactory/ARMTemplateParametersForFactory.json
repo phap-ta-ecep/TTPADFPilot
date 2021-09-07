@@ -1,0 +1,79 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "ttpDatafactory"
+		},
+		"LS_AWS_SqlServer_connectionString": {
+			"value": ""
+		},
+		"LS_Connect_STG_connectionString": {
+			"value": ""
+		},
+		"PilotConnectODS_connectionString": {
+			"value": ""
+		},
+		"SqlServer1_connectionString": {
+			"value": ""
+		},
+		"connectSQL_connectionString": {
+			"value": ""
+		},
+		"inputBlod_connectionString": {
+			"value": ""
+		},
+		"ls_connectDB_connectionString": {
+			"value": ""
+		},
+		"ls_getMetaDataDataset_accountKey": {
+			"value": ""
+		},
+		"HTTP_LogoConnection_properties_typeProperties_url": {
+			"value": "https://cdn.rebrickable.com/media/downloads/"
+		},
+		"ls_getMetaDataDataset_properties_typeProperties_url": {
+			"value": "https://ttpstaccount.dfs.core.windows.net"
+		},
+		"EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName": {
+			"value": "@triggerBody().fileName"
+		},
+		"EventTrigger_properties_typeProperties_scope": {
+			"value": "/subscriptions/26edfad9-6834-4c07-b452-c8877d41c0a3/resourceGroups/ttp_rg_1/providers/Microsoft.Storage/storageAccounts/ttpstaccount"
+		},
+		"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S": {
+			"value": "1,2,3,4,5,6,7,8,9"
+		},
+		"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_Ar": {
+			"value": [
+				"1",
+				"2",
+				"3",
+				"4",
+				"5",
+				"6",
+				"7",
+				"8",
+				"9"
+			]
+		},
+		"TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId": {
+			"value": 1
+		},
+		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName": {
+			"value": "Cars"
+		},
+		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName": {
+			"value": "ttp_sqldatabase"
+		},
+		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"value": "ttpsqlserver.database.windows.net"
+		},
+		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"value": "ttpadmin"
+		},
+		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"value": ""
+		}
+	}
+}

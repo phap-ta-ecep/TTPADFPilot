@@ -1,0 +1,308 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ttpDatafactory"
+		},
+		"TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId": {
+			"type": "int",
+			"defaultValue": 1
+		},
+		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName": {
+			"type": "string",
+			"defaultValue": "Cars"
+		},
+		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName": {
+			"type": "string",
+			"defaultValue": "ttp_sqldatabase"
+		},
+		"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S": {
+			"type": "string",
+			"defaultValue": "1,2,3,4,5,6,7,8,9"
+		},
+		"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_Ar": {
+			"type": "array",
+			"defaultValue": [
+				"1",
+				"2",
+				"3",
+				"4",
+				"5",
+				"6",
+				"7",
+				"8",
+				"9"
+			]
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/TG_Transfer_PilotDesDB')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Scheduler for transfer data from DW to PilotDesDB",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "plp_Transfer_Data_To_PilotDesDB",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"processConfigId": "[parameters('TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 2,
+						"startTime": "2021-09-07T03:57:00",
+						"endTime": "2021-09-08T03:57:00",
+						"timeZone": "Pacific Standard Time"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/paramsTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pipelineUseParams",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"pipelineTableName": "[parameters('paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName')]",
+							"pipelineDBName": "[parameters('paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 1,
+						"startTime": "2021-08-11T13:36:00Z",
+						"endTime": "2021-08-11T15:36:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/plp_ETL_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ETL-1-ForEach list config id",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.listConfigId",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "ETL-1-1-Execute Pipeline ETL Sub",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "plp_ETL_Sub",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"configId": {
+												"value": "@item()",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"listConfigId": {
+						"type": "array",
+						"defaultValue": [
+							"1"
+						]
+					}
+				},
+				"folder": {
+					"name": "Pilot"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/plp_Master_Process')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "MP-1-Insert new files to control data-file",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "plp_InsertFileToControl_Main",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"listConfigId": {
+									"value": "@pipeline().parameters.listConfigId_S",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "MP-2-Extract files to ODS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "MP-1-Insert new files to control data-file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "plp_ETL_Main",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"listConfigId": {
+									"value": "@pipeline().parameters.listConfigId_Ar",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "MP-3-Sync data from ODS to STG",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "MP-2-Extract files to ODS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "plp_SyncODSToSTG",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"listConfigId_Ar": {
+									"value": "@pipeline().parameters.listConfigId_Ar",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"listConfigId_S": {
+						"type": "string",
+						"defaultValue": "1,2,3,4,5,6,7,8,9"
+					},
+					"listConfigId_Ar": {
+						"type": "array",
+						"defaultValue": [
+							"1",
+							"2",
+							"3",
+							"4",
+							"5",
+							"6",
+							"7",
+							"8",
+							"9"
+						]
+					}
+				},
+				"folder": {
+					"name": "Pilot"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/plp_ETL_Main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TG_ETL_Pilot_Data')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "plp_Master_Process",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"listConfigId_S": "[parameters('TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S')]",
+							"listConfigId_Ar": "[parameters('TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_Ar')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 1,
+						"startTime": "2021-09-07T08:00:00Z",
+						"endTime": "2021-09-08T07:49:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/plp_Master_Process')]"
+			]
+		}
+	]
+}
