@@ -800,7 +800,10 @@
 										"value": "@pipeline().DataFactory",
 										"type": "Expression"
 									},
-									"ErrorMessage": "Activity 'Merge data from temp to ODS' is Fail",
+									"ErrorMessage": {
+										"value": "@activity('ETL-1-1-6-1 Merge data from temp to ODS').Error.Message",
+										"type": "Expression"
+									},
 									"RunID": {
 										"value": "@pipeline().RunId",
 										"type": "Expression"
