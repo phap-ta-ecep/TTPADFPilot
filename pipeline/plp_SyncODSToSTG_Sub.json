@@ -356,6 +356,9 @@
 			"isDataChanged": {
 				"type": "Boolean",
 				"defaultValue": false
+			},
+			"configId": {
+				"type": "String"
 			}
 		},
 		"folder": {
