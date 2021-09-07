@@ -47,10 +47,6 @@
 			"type": "string",
 			"defaultValue": "https://ttpstaccount.dfs.core.windows.net"
 		},
-		"EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName": {
-			"type": "string",
-			"defaultValue": "@triggerBody().fileName"
-		},
 		"EventTrigger_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/26edfad9-6834-4c07-b452-c8877d41c0a3/resourceGroups/ttp_rg_1/providers/Microsoft.Storage/storageAccounts/ttpstaccount"
@@ -76,14 +72,6 @@
 		"TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId": {
 			"type": "int",
 			"defaultValue": 1
-		},
-		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName": {
-			"type": "string",
-			"defaultValue": "Cars"
-		},
-		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName": {
-			"type": "string",
-			"defaultValue": "ttp_sqldatabase"
 		},
 		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 			"type": "string",
@@ -153,6 +141,9 @@
 					"ls_getMetaDataDataset_properties_typeProperties_url": {
 						"value": "[parameters('ls_getMetaDataDataset_properties_typeProperties_url')]"
 					},
+					"EventTrigger_properties_typeProperties_scope": {
+						"value": "[parameters('EventTrigger_properties_typeProperties_scope')]"
+					},
 					"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 						"value": "[parameters('ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
 					},
@@ -180,60 +171,8 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName": {
-						"value": "[parameters('EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName')]"
-					},
-					"EventTrigger_properties_typeProperties_scope": {
-						"value": "[parameters('EventTrigger_properties_typeProperties_scope')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ttpDatafactory_ArmTemplate_0')]"
-			]
-		},
-		{
-			"name": "ttpDatafactory_ArmTemplate_2",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ttpDatafactory_ArmTemplate_1')]"
-			]
-		},
-		{
-			"name": "ttpDatafactory_ArmTemplate_3",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
-					},
 					"TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId": {
 						"value": "[parameters('TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId')]"
-					},
-					"paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName": {
-						"value": "[parameters('paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName')]"
-					},
-					"paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName": {
-						"value": "[parameters('paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName')]"
 					},
 					"TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S": {
 						"value": "[parameters('TG_ETL_Pilot_Data_properties_plp_Master_Process_parameters_listConfigId_S')]"
@@ -244,7 +183,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ttpDatafactory_ArmTemplate_2')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ttpDatafactory_ArmTemplate_0')]"
 			]
 		}
 	]

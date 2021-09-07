@@ -35,9 +35,6 @@
 		"ls_getMetaDataDataset_properties_typeProperties_url": {
 			"value": "https://ttpstaccount.dfs.core.windows.net"
 		},
-		"EventTrigger_properties_LoadHourlyAndDailySales_parameters_FileName": {
-			"value": "@triggerBody().fileName"
-		},
 		"EventTrigger_properties_typeProperties_scope": {
 			"value": "/subscriptions/26edfad9-6834-4c07-b452-c8877d41c0a3/resourceGroups/ttp_rg_1/providers/Microsoft.Storage/storageAccounts/ttpstaccount"
 		},
@@ -59,12 +56,6 @@
 		},
 		"TG_Transfer_PilotDesDB_properties_plp_Transfer_Data_To_PilotDesDB_parameters_processConfigId": {
 			"value": 1
-		},
-		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineTableName": {
-			"value": "Cars"
-		},
-		"paramsTrigger_properties_pipelineUseParams_parameters_pipelineDBName": {
-			"value": "ttp_sqldatabase"
 		},
 		"ttpAzureSSISIntegrationRuntime_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 			"value": "ttpsqlserver.database.windows.net"
