@@ -64,7 +64,13 @@
 						"referenceName": "plp_SyncODSToSTG",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"listConfigId_Ar": {
+							"value": "@pipeline().parameters.listConfigId_Ar",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
