@@ -3198,12 +3198,12 @@
 									"userProperties": [],
 									"typeProperties": {
 										"expression": {
-											"value": "@and(\ngreater(int(variables('endExcutionId')), int(variables('startExecutionId'))),\nequals(variables('isComplete'),'0')\n)",
+											"value": "@and(\ngreater(int(variables('endExcutionId')), int(variables('startExecutionId'))),\nequals(variables('isComplete'),'False')\n)",
 											"type": "Expression"
 										},
 										"ifFalseActivities": [
 											{
-												"name": "TR-1-8-1-Update sub process status",
+												"name": "TR-1-8-4-Update sub process status",
 												"type": "SqlServerStoredProcedure",
 												"dependsOn": [],
 												"policy": {
