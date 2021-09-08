@@ -181,6 +181,13 @@
 		"variables": {
 			"fileCounts": {
 				"type": "String"
+			},
+			"errorMessage": {
+				"type": "String"
+			},
+			"isPipelineFail": {
+				"type": "Boolean",
+				"defaultValue": false
 			}
 		},
 		"folder": {
