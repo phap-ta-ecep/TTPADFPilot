@@ -1283,6 +1283,52 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "ETL-1-1-11- Write log and send notification",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ETL-1-1-2-Truncate temp table",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_Control_Pipeline_Fail",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineName": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"DataFactoryName": {
+							"value": "@pipeline().DataFactory",
+							"type": "Expression"
+						},
+						"ErrorMessage": {
+							"value": "@activity('ETL-1-1-2-Truncate temp table').Error.Message",
+							"type": "Expression"
+						},
+						"RunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().TriggerName",
+							"type": "Expression"
+						},
+						"TriggerTime": {
+							"value": "@pipeline().TriggerTime",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
