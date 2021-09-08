@@ -1037,17 +1037,6 @@
 						"value": "@variables('isExtractFail')",
 						"type": "Expression"
 					},
-					"ifFalseActivities": [
-						{
-							"name": "ETL-1-1-5-1 Extract Files Completed",
-							"type": "Wait",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						}
-					],
 					"ifTrueActivities": [
 						{
 							"name": "ETL-1-1-5-1 Refresh  status file to ER",
