@@ -379,7 +379,7 @@
 													"type": "Expression"
 												},
 												"ErrorMessage": {
-													"value": "@activity('TR-1-8-1-Transfer data to Des DB').output.errors[0].Message",
+													"value": "@activity('TR-1-8-1-Transfer data to Des DB').Error.Message",
 													"type": "Expression"
 												},
 												"RunID": {
