@@ -624,6 +624,36 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "TR-6-Lastest to update Guid",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "TR-2-ForEach-lookup results",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[stg].[usp_transfer_Lastest_Update_Guid_On_STG]"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AWS_SqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"dbName": "PilotDesDB"
+					}
+				}
 			}
 		],
 		"parameters": {
