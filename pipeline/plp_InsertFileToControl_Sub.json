@@ -150,6 +150,52 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "IS-2-1-4 Pipeline to control error",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "IS-2-1-1-Get Metadata",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_Control_Pipeline_Fail",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineName": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"DataFactoryName": {
+							"value": "@pipeline().DataFactory",
+							"type": "Expression"
+						},
+						"ErrorMessage": {
+							"value": "@activity('IS-2-1-1-Get Metadata').Error.Message",
+							"type": "Expression"
+						},
+						"RunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().TriggerName",
+							"type": "Expression"
+						},
+						"TriggerTime": {
+							"value": "@pipeline().TriggerTime",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
