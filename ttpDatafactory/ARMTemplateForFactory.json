@@ -3414,7 +3414,7 @@
 															"type": "Expression"
 														},
 														"ErrorMessage": {
-															"value": "@activity('TR-1-8-1-Transfer data to Des DB').output.errors[0].Message",
+															"value": "@activity('TR-1-8-1-Transfer data to Des DB').Error.Message",
 															"type": "Expression"
 														},
 														"RunID": {
@@ -3659,6 +3659,36 @@
 								}
 							}
 						}
+					},
+					{
+						"name": "TR-6-Lastest to update Guid",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "TR-2-ForEach-lookup results",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[stg].[usp_transfer_Lastest_Update_Guid_On_STG]"
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AWS_SqlServer",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"dbName": "PilotDesDB"
+							}
+						}
 					}
 				],
 				"parameters": {
@@ -3703,6 +3733,7 @@
 				"[concat(variables('factoryId'), '/datasets/DS_Pilot_SQL_Broad')]",
 				"[concat(variables('factoryId'), '/linkedServices/connectSQL')]",
 				"[concat(variables('factoryId'), '/pipelines/plp_Control_Pipeline_Fail')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_AWS_SqlServer')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Pilot_SQL_AWS_DES')]"
 			]
 		},
