@@ -906,17 +906,6 @@
 						"value": "@greater(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0)",
 						"type": "Expression"
 					},
-					"ifFalseActivities": [
-						{
-							"name": "ETL-1-1-7-3 Wait 1s",
-							"type": "Wait",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						}
-					],
 					"ifTrueActivities": [
 						{
 							"name": "ETL-1-1-7-2 Execute Pipeline To Send Notification",
