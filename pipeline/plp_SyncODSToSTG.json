@@ -37,7 +37,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\n\nEXEC [ods].[ctl_get_ExecutionLogId_Information] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @odsTableName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName\n",
+										"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\nDECLARE @stgExecutionId INT;\n\nEXEC [ods].[ctl_get_ExecutionLogId_Information] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @odsTableName OUTPUT, @stgExecutionId OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName, @stgExecutionId AS stgExecutionId\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -72,6 +72,12 @@
 								},
 								{
 									"activity": "TR-1-2-3- Set variable ODSTableName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "TR-1-2-5- Set variable stgExecutionId",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -409,6 +415,26 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "TR-1-2-5- Set variable stgExecutionId",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "stgExecutionId",
+								"value": {
+									"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].stgExecutionId)",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -540,6 +566,9 @@
 			"isDataChanged": {
 				"type": "Boolean",
 				"defaultValue": false
+			},
+			"stgExecutionId": {
+				"type": "String"
 			}
 		},
 		"folder": {
