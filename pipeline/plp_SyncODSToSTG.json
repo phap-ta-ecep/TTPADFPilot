@@ -151,6 +151,13 @@
 													},
 													"type": "Int32"
 												},
+												"stgExecutionId": {
+													"value": {
+														"value": "@variables('stgExecutionId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
 												"tableName": {
 													"value": {
 														"value": "@variables('odsTableName')",
