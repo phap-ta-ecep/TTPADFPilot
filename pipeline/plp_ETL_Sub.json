@@ -579,17 +579,6 @@
 						"value": "@and(and( not(variables('isExtractFail')) , greater(activity('ETL-1-1-1-Lookup file_status is ER').output.count, 0)),\nequals(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0))",
 						"type": "Expression"
 					},
-					"ifFalseActivities": [
-						{
-							"name": "ETL-1-1-6-6 Exit merge process",
-							"type": "Wait",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						}
-					],
 					"ifTrueActivities": [
 						{
 							"name": "ETL-1-1-6-1 Merge data from temp to ODS",
@@ -917,17 +906,6 @@
 						"value": "@greater(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0)",
 						"type": "Expression"
 					},
-					"ifFalseActivities": [
-						{
-							"name": "ETL-1-1-7-3 Wait 1s",
-							"type": "Wait",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"waitTimeInSeconds": 1
-							}
-						}
-					],
 					"ifTrueActivities": [
 						{
 							"name": "ETL-1-1-7-2 Execute Pipeline To Send Notification",

@@ -240,7 +240,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "select * from @{variables('concurrentTransName')}\nwhere ODSLastUpdateExecutionId > @{variables('startExecutionId')} \nand ODSLastUpdateExecutionId <= @{variables('endExcutionId')}\n;",
+													"value": "select * from @{variables('concurrentTransName')}\nwhere STGLastUpdateExecutionId > @{variables('startExecutionId')} \nand STGLastUpdateExecutionId <= @{variables('endExcutionId')}\n;",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
