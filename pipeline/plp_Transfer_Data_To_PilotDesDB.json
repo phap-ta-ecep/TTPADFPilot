@@ -443,68 +443,6 @@
 				}
 			},
 			{
-				"name": "TR-3-Update process status SU",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "TR-2-ForEach-lookup results",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"storedProcedureName": "[ods].[ctl_update_Process_Status]",
-					"storedProcedureParameters": {
-						"concurrentTransName": {
-							"value": {
-								"value": "@variables('concurrentTransName')",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"isComplete": {
-							"value": null,
-							"type": "Int32"
-						},
-						"pipelineRunId": {
-							"value": {
-								"value": "@pipeline().RunId",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"processId": {
-							"value": {
-								"value": "@variables('processId')",
-								"type": "Expression"
-							},
-							"type": "Int32"
-						},
-						"processStatus": {
-							"value": "SU",
-							"type": "String"
-						},
-						"updateType": {
-							"value": "2",
-							"type": "Int32"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "connectSQL",
-					"type": "LinkedServiceReference"
-				}
-			},
-			{
 				"name": "TR-0 Insert process",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [],
@@ -580,54 +518,8 @@
 				}
 			},
 			{
-				"name": "TR-5-Pipeline to control error",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "TR-3-Update process status SU",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "plp_Control_Pipeline_Fail",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"PipelineName": {
-							"value": "@pipeline().Pipeline",
-							"type": "Expression"
-						},
-						"DataFactoryName": {
-							"value": "@pipeline().DataFactory",
-							"type": "Expression"
-						},
-						"ErrorMessage": {
-							"value": "@activity('TR-3-Update process status SU').Error.Message",
-							"type": "Expression"
-						},
-						"RunID": {
-							"value": "@pipeline().RunId",
-							"type": "Expression"
-						},
-						"TriggerName": {
-							"value": "@pipeline().TriggerName",
-							"type": "Expression"
-						},
-						"TriggerTime": {
-							"value": "@pipeline().TriggerTime",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "TR-6-Lastest to update Guid",
-				"type": "SqlServerStoredProcedure",
+				"name": "TR-3 check to update process status",
+				"type": "IfCondition",
 				"dependsOn": [
 					{
 						"activity": "TR-2-ForEach-lookup results",
@@ -636,23 +528,145 @@
 						]
 					}
 				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[stg].[usp_transfer_Lastest_Update_Guid_On_STG]"
-				},
-				"linkedServiceName": {
-					"referenceName": "LS_AWS_SqlServer",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"dbName": "PilotDesDB"
-					}
+					"expression": {
+						"value": "@greater(activity('TR-1-Get transfer process information').output.count,0)\n",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "TR-6-Lastest to update Guid",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "TR-3-Update process status SU",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[stg].[usp_transfer_Lastest_Update_Guid_On_STG]"
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AWS_SqlServer",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"dbName": "PilotDesDB"
+								}
+							}
+						},
+						{
+							"name": "TR-3-Update process status SU",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[ods].[ctl_update_Process_Status]",
+								"storedProcedureParameters": {
+									"concurrentTransName": {
+										"value": {
+											"value": "@variables('concurrentTransName')",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"isComplete": {
+										"value": null,
+										"type": "Int32"
+									},
+									"pipelineRunId": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"processId": {
+										"value": {
+											"value": "@variables('processId')",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"processStatus": {
+										"value": "SU",
+										"type": "String"
+									},
+									"updateType": {
+										"value": "2",
+										"type": "Int32"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "connectSQL",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "TR-5-Pipeline to control error",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "TR-3-Update process status SU",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "plp_Control_Pipeline_Fail",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"DataFactoryName": {
+										"value": "@pipeline().DataFactory",
+										"type": "Expression"
+									},
+									"ErrorMessage": {
+										"value": "@activity('TR-3-Update process status SU').Error.Message",
+										"type": "Expression"
+									},
+									"RunID": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"TriggerTime": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
 				}
 			}
 		],
