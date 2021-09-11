@@ -352,52 +352,6 @@
 										}
 									},
 									{
-										"name": "TR-1-8-3-Pipeline to control error",
-										"type": "ExecutePipeline",
-										"dependsOn": [
-											{
-												"activity": "TR-1-8-1-Transfer data to Des DB",
-												"dependencyConditions": [
-													"Failed"
-												]
-											}
-										],
-										"userProperties": [],
-										"typeProperties": {
-											"pipeline": {
-												"referenceName": "plp_Control_Pipeline_Fail",
-												"type": "PipelineReference"
-											},
-											"waitOnCompletion": true,
-											"parameters": {
-												"PipelineName": {
-													"value": "@pipeline().Pipeline",
-													"type": "Expression"
-												},
-												"DataFactoryName": {
-													"value": "@pipeline().DataFactory",
-													"type": "Expression"
-												},
-												"ErrorMessage": {
-													"value": "@activity('TR-1-8-1-Transfer data to Des DB').Error.Message",
-													"type": "Expression"
-												},
-												"RunID": {
-													"value": "@pipeline().RunId",
-													"type": "Expression"
-												},
-												"TriggerName": {
-													"value": "@pipeline().TriggerName",
-													"type": "Expression"
-												},
-												"TriggerTime": {
-													"value": "@pipeline().TriggerTime",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									{
 										"name": "TR-1-8-4 Set variable isTransferError",
 										"type": "SetVariable",
 										"dependsOn": [
@@ -413,6 +367,66 @@
 											"variableName": "isTransferError",
 											"value": {
 												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "TR-1-8-3 Set errorMessage",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-1-Transfer data to Des DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "errorMessage",
+											"value": {
+												"value": "@activity('TR-1-8-1-Transfer data to Des DB').Error.Message",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "TR-1-8-5 Set variable isTransferError",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-2-Update sub process status",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isTransferError",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "TR-1-8-6 Set errorMessage",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-2-Update sub process status",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "errorMessage",
+											"value": {
+												"value": "@activity('TR-1-8-2-Update sub process status').Error.Message",
 												"type": "Expression"
 											}
 										}
@@ -699,6 +713,52 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "TR-1-4-Pipeline to control error",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "TR-2-ForEach-lookup results",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "plp_Control_Pipeline_Fail",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineName": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"DataFactoryName": {
+							"value": "@pipeline().DataFactory",
+							"type": "Expression"
+						},
+						"ErrorMessage": {
+							"value": "@variables('errorMessage')",
+							"type": "Expression"
+						},
+						"RunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"TriggerName": {
+							"value": "@pipeline().TriggerName",
+							"type": "Expression"
+						},
+						"TriggerTime": {
+							"value": "@pipeline().TriggerTime",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -731,6 +791,9 @@
 				"type": "String"
 			},
 			"tableType": {
+				"type": "String"
+			},
+			"errorMessage": {
 				"type": "String"
 			}
 		},
