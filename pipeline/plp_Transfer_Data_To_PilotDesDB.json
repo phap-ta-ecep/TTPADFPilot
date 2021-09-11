@@ -396,6 +396,26 @@
 												}
 											}
 										}
+									},
+									{
+										"name": "TR-1-8-4 Set variable isTransferError",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-1-Transfer data to Des DB",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isTransferError",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
 									}
 								]
 							}
@@ -531,7 +551,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(activity('TR-1-Get transfer process information').output.count,0)",
+						"value": "@and(greater(activity('TR-1-Get transfer process information').output.count,0) , variables('isTransferError'))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
