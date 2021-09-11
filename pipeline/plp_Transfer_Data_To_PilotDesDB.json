@@ -551,7 +551,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(greater(activity('TR-1-Get transfer process information').output.count,0) , variables('isTransferError'))",
+						"value": "@and(greater(activity('TR-1-Get transfer process information').output.count,0) , not(variables('isTransferError')) )\n",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
