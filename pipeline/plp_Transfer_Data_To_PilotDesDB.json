@@ -530,6 +530,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('TR-1-Get transfer process information').output.count,0)",
+						"type": "Expression"
+					},
 					"ifFalseActivities": [
 						{
 							"name": "TR-3-5 Exit by no transfer process",
