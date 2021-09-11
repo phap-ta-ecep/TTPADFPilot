@@ -166,6 +166,63 @@
 									"value": "@and(\ngreater(int(variables('endExcutionId')), int(variables('startExecutionId'))),\nequals(variables('isComplete'),'false')\n)",
 									"type": "Expression"
 								},
+								"ifFalseActivities": [
+									{
+										"name": "TR-1-8-5-Update sub process status",
+										"type": "SqlServerStoredProcedure",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"storedProcedureName": "[ods].[ctl_update_Process_Status]",
+											"storedProcedureParameters": {
+												"concurrentTransName": {
+													"value": {
+														"value": "@variables('concurrentTransName')",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"isComplete": {
+													"value": "1",
+													"type": "Int32"
+												},
+												"pipelineRunId": {
+													"value": {
+														"value": "@pipeline().RunId",
+														"type": "Expression"
+													},
+													"type": "String"
+												},
+												"processId": {
+													"value": {
+														"value": "@variables('processId')",
+														"type": "Expression"
+													},
+													"type": "Int32"
+												},
+												"processStatus": {
+													"value": null,
+													"type": "String"
+												},
+												"updateType": {
+													"value": "1",
+													"type": "Int32"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "connectSQL",
+											"type": "LinkedServiceReference"
+										}
+									}
+								],
 								"ifTrueActivities": [
 									{
 										"name": "TR-1-8-1-Transfer data to Des DB",
