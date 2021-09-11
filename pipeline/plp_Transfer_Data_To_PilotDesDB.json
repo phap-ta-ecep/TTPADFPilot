@@ -221,6 +221,46 @@
 											"referenceName": "connectSQL",
 											"type": "LinkedServiceReference"
 										}
+									},
+									{
+										"name": "TR-1-8-6 Set variable isTransferError",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-5-Update sub process status",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "isTransferError",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "TR-1-8-7 Set errorMessage",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "TR-1-8-5-Update sub process status",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "errorMessage",
+											"value": {
+												"value": "@activity('TR-1-8-5-Update sub process status').Error.Message",
+												"type": "Expression"
+											}
+										}
 									}
 								],
 								"ifTrueActivities": [
