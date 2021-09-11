@@ -534,13 +534,24 @@
 						"value": "@greater(activity('TR-1-Get transfer process information').output.count,0)\n",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "TR-3-4-Exit By No Transfer Process",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
-							"name": "TR-6-Lastest to update Guid",
+							"name": "TR-3-2-Lastest to update Guid",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "TR-3-Update process status SU",
+									"activity": "TR-3-1-Update process status SU",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -566,7 +577,7 @@
 							}
 						},
 						{
-							"name": "TR-3-Update process status SU",
+							"name": "TR-3-1-Update process status SU",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -621,11 +632,11 @@
 							}
 						},
 						{
-							"name": "TR-5-Pipeline to control error",
+							"name": "TR-3-3-Pipeline to control error",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "TR-3-Update process status SU",
+									"activity": "TR-3-1-Update process status SU",
 									"dependencyConditions": [
 										"Failed"
 									]
