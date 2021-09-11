@@ -659,7 +659,7 @@
 										"type": "Expression"
 									},
 									"ErrorMessage": {
-										"value": "@activity('TR-3-Update process status SU').Error.Message",
+										"value": "@activity('TR-3-1-Update process status SU').Error.Message",
 										"type": "Expression"
 									},
 									"RunID": {
