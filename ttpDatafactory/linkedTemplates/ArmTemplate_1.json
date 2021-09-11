@@ -264,7 +264,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\n\nEXEC [ods].[ctl_get_ExecutionLogId_Information] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @odsTableName OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName\n",
+												"value": "DECLARE @startExecutionId INT;\nDECLARE @endExecutionId INT;\nDECLARE @odsTableName varchar(30);\nDECLARE @stgExecutionId INT;\n\nEXEC [ods].[ctl_get_ExecutionLogId_Information] @{variables('configId')}, @startExecutionId OUTPUT, @endExecutionId OUTPUT, @odsTableName OUTPUT, @stgExecutionId OUTPUT\n\nSELECT @startExecutionId AS startExecutionId , @endExecutionId  AS endExecutionId, @odsTableName AS odsTableName, @stgExecutionId AS stgExecutionId\n",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
@@ -299,6 +299,12 @@
 										},
 										{
 											"activity": "TR-1-2-3- Set variable ODSTableName",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "TR-1-2-5- Set variable stgExecutionId",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -368,6 +374,13 @@
 														"startExecutionId": {
 															"value": {
 																"value": "@variables('startExecutionId')",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"stgExecutionId": {
+															"value": {
+																"value": "@variables('stgExecutionId')",
 																"type": "Expression"
 															},
 															"type": "Int32"
@@ -484,6 +497,13 @@
 														"startExecutionId": {
 															"value": {
 																"value": "@variables('startExecutionId')",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"stgExecutionId": {
+															"value": {
+																"value": "@int(variables('stgExecutionId'))",
 																"type": "Expression"
 															},
 															"type": "Int32"
@@ -636,6 +656,26 @@
 											}
 										}
 									}
+								},
+								{
+									"name": "TR-1-2-5- Set variable stgExecutionId",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "TR-1-2-Get lastest transfer and current executionLogId",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "stgExecutionId",
+										"value": {
+											"value": "@string(activity('TR-1-2-Get lastest transfer and current executionLogId').output.value[0].stgExecutionId)",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -767,6 +807,9 @@
 					"isDataChanged": {
 						"type": "Boolean",
 						"defaultValue": false
+					},
+					"stgExecutionId": {
+						"type": "String"
 					}
 				},
 				"folder": {
@@ -1020,7 +1063,7 @@
 													"source": {
 														"type": "AzureSqlSource",
 														"sqlReaderQuery": {
-															"value": "select * from @{variables('concurrentTransName')}\nwhere ODSLastUpdateExecutionId > @{variables('startExecutionId')} \nand ODSLastUpdateExecutionId <= @{variables('endExcutionId')}\n;",
+															"value": "select * from @{variables('concurrentTransName')}\nwhere STGLastUpdateExecutionId > @{variables('startExecutionId')} \nand STGLastUpdateExecutionId <= @{variables('endExcutionId')}\n;",
 															"type": "Expression"
 														},
 														"queryTimeout": "02:00:00",
@@ -2059,17 +2102,6 @@
 								"value": "@and(and( not(variables('isExtractFail')) , greater(activity('ETL-1-1-1-Lookup file_status is ER').output.count, 0)),\nequals(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0))",
 								"type": "Expression"
 							},
-							"ifFalseActivities": [
-								{
-									"name": "ETL-1-1-6-6 Exit merge process",
-									"type": "Wait",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"waitTimeInSeconds": 1
-									}
-								}
-							],
 							"ifTrueActivities": [
 								{
 									"name": "ETL-1-1-6-1 Merge data from temp to ODS",
@@ -2397,17 +2429,6 @@
 								"value": "@greater(activity('ETL-1-1-4-Check current up to date').output.firstRow.Ncount, 0)",
 								"type": "Expression"
 							},
-							"ifFalseActivities": [
-								{
-									"name": "ETL-1-1-7-3 Wait 1s",
-									"type": "Wait",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"waitTimeInSeconds": 1
-									}
-								}
-							],
 							"ifTrueActivities": [
 								{
 									"name": "ETL-1-1-7-2 Execute Pipeline To Send Notification",
