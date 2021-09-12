@@ -16,22 +16,88 @@
 					"batchCount": 4,
 					"activities": [
 						{
-							"name": "ETL-1-1-Execute Pipeline ETL Sub",
-							"type": "ExecutePipeline",
+							"name": "ETL-Lookup file_status is ER",
+							"description": "Get list file name with configId=$id and file_status='ER'",
+							"type": "Lookup",
 							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
-								"pipeline": {
-									"referenceName": "plp_ETL_Sub",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"configId": {
-										"value": "@item()",
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "select a.file_name ,b.data_file_target_schema,b.data_file_target_table,b.container_dir,b.import_dir\n,b.success_dir,b.error_dir, b.delimiter\nfrom control.data_file a\nleft join control.data_file_configuration b on a.data_file_config_id = b.data_file_config_id \nwhere a.file_status in ('ER') and a.data_file_config_id =@{item()}",
 										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_Pilot_SQL_Broad",
+									"type": "DatasetReference",
+									"parameters": {
+										"tableName": "Null",
+										"schema": "Null"
 									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "ETL-Lookup file_status is ER",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(activity('ETL-Lookup file_status is ER').output.count, 0)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Exit by not files for ETL",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "ETL-1-1-Execute Pipeline ETL Sub",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "plp_ETL_Sub",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"configId": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
 							}
 						}
 					]
