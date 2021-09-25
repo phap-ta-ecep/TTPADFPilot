@@ -1,7 +1,7 @@
 {
 	"name": "plp_Control_Pipeline_Fail",
 	"properties": {
-		"description": "the pipeline is control fail -> {send mail, log, ...}",
+		"description": "VScode TTP+V5 control fail -> {send mail, log, ...}",
 		"activities": [
 			{
 				"name": "End Notification",
