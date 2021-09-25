@@ -1,7 +1,7 @@
 {
 	"name": "plp_Control_Pipeline_Fail",
 	"properties": {
-		"description": "If the pipeline is fail -> {send mail, log, ...}",
+		"description": "ttpv31 If the pipeline is fail -> {send mail, log, ...}",
 		"activities": [
 			{
 				"name": "End Notification",
